@@ -118,6 +118,19 @@ public final class RhapsodySdkWrapper {
 	}
 
 	/**
+	 * Removes the authorization information from the Preferences store.
+	 */
+	public void clearAuthorization() {
+		Preferences preferences = Preferences.userNodeForPackage(getClass());
+		preferences.remove(PROPERTY_ACCESS_TOKEN);
+		preferences.remove(PROPERTY_REFRESH_TOKEN);
+		preferences.remove(PROPERTY_CATALOG);
+		accessToken = null;
+		refreshToken = null;
+		catalog = null;
+	}
+
+	/**
 	 * Authorizes for making API requests by using a Rhapsody or Napster login. An access token will be received together with a refresh
 	 * token and a catalog ID. All three values are set in this bean and are stored in the Preferences store.
 	 *

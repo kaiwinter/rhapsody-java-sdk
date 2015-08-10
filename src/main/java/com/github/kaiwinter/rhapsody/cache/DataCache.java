@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
-import javafx.application.Platform;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -67,7 +66,7 @@ public final class DataCache {
 		private final Callback<T> callback;
 
 		/**
-		 * Gets called in {@link Platform#runLater(Runnable)} context.
+		 * Is called after the value was cached.
 		 *
 		 * @param resultObject
 		 *            the result object
@@ -88,13 +87,8 @@ public final class DataCache {
 
 		@Override
 		public void success(T resultObject, Response response) {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					successExt(resultObject, response);
-					callback.success(resultObject, response);
-				}
-			});
+			successExt(resultObject, response);
+			callback.success(resultObject, response);
 		}
 
 		@Override

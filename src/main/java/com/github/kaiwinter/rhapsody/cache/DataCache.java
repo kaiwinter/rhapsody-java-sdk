@@ -23,30 +23,30 @@ public final class DataCache {
 	/**
 	 * Returns the new releases for the given <code>genreId</code>.
 	 *
-	 * @param genreId
-	 *            the ID of the Genre
+	 * @param cacheId
+	 *            the ID key in the cache, e.g. genre ID
 	 * @return the new releases, or <code>null</code> if not cached.
 	 */
-	public Collection<AlbumData> getReleasesOfGenre(String genreId) {
-		return genre2NewReleases.get(genreId);
+	public Collection<AlbumData> getNewReleases(String cacheId) {
+		return genre2NewReleases.get(cacheId);
 	}
 
 	/**
 	 * Wraps the given <code>callback</code> in an internal callback which adds the result of the given <code>callback</code> to the cache
 	 * and calls the original callback afterwards.
 	 *
-	 * @param genreId
-	 *            the ID of the genre
+	 * @param cacheId
+	 *            the ID which is used as key in the cache, e.g. genre ID
 	 * @param callback
 	 *            the original callback
 	 * @return the wrapped original callback
 	 */
-	public Callback<Collection<AlbumData>> getAddNewReleasesToCacheCallback(String genreId, Callback<Collection<AlbumData>> callback) {
+	public Callback<Collection<AlbumData>> getAddNewReleasesToCacheCallback(String cacheId, Callback<Collection<AlbumData>> callback) {
 		return new CallbackExtension<Collection<AlbumData>>(callback) {
 
 			@Override
 			public void successExt(Collection<AlbumData> albums, Response response) {
-				genre2NewReleases.put(genreId, albums);
+				genre2NewReleases.put(cacheId, albums);
 			}
 		};
 	}

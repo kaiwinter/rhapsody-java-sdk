@@ -258,8 +258,20 @@ public final class RhapsodySdkWrapper {
 		genreService.getGenres("Bearer " + accessToken, prettyJson, catalog, callback);
 	}
 
-	public void loadNewReleasesOfGenre(String genreId, Callback<Collection<AlbumData>> callback) {
-		Collection<AlbumData> data = dataCache.getReleasesOfGenre(genreId);
+	public void loadAlbumNewReleases(Callback<Collection<AlbumData>> callback) {
+		Collection<AlbumData> data = dataCache.getNewReleases("rhapsody");
+		if (data == null) {
+			LOGGER.info("Loading new releases from server [RHAPSODY]");
+			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback("rhapsody", callback);
+			albumService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, callbackExt);
+		} else {
+			LOGGER.info("Using new releases from cache [RHAPSODY]");
+			callback.success(data, null);
+		}
+	}
+
+	public void loadGenreNewReleases(String genreId, Callback<Collection<AlbumData>> callback) {
+		Collection<AlbumData> data = dataCache.getNewReleases(genreId);
 		if (data == null) {
 			LOGGER.info("Loading new releases from server");
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);

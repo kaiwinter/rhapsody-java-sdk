@@ -1,5 +1,7 @@
 package com.github.kaiwinter.rhapsody.service;
 
+import java.util.Collection;
+
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import retrofit.Callback;
@@ -36,4 +38,23 @@ public interface AlbumService {
 			@Query("catalog") String catalog, //
 			@Path("albumId") String albumId, //
 			Callback<AlbumData> callBack);
+
+	/**
+	 * Returns a list of all new releases, curated by Rhapsody.
+	 * 
+	 * @param authorization
+	 *            the access token
+	 * @param pretty
+	 *            if <code>true</code> pretty prints the JSON
+	 * @param catalog
+	 *            countries' catalog (two-letter country code, which is case-sensitive)
+	 * @param callBack
+	 *            callback to which the result is passed
+	 */
+	@GET("/v1/albums/new")
+	void getNewReleases( //
+			@Header("Authorization") String authorization, //
+			@Query("pretty") boolean pretty, //
+			@Query("catalog") String catalog, //
+			Callback<Collection<AlbumData>> callBack);
 }

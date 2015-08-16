@@ -20,6 +20,7 @@ import com.github.kaiwinter.rhapsody.service.ArtistService;
 import com.github.kaiwinter.rhapsody.service.AuthorizingService;
 import com.github.kaiwinter.rhapsody.service.GenreService;
 
+import javafx.scene.image.Image;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RestAdapter.LogLevel;
@@ -45,6 +46,7 @@ public final class RhapsodySdkWrapper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RhapsodySdkWrapper.class.getSimpleName());
 
 	private static final String API_URL = "https://api.rhapsody.com";
+	private static final String RHAPSODY_IMAGE_URL = "http://direct.rhapsody.com/imageserver/v2/artists/{artist_id}/images/{size}.{extension}";
 
 	private static final String PROPERTY_ACCESS_TOKEN = "access_token";
 	private static final String PROPERTY_REFRESH_TOKEN = "refresh_token";
@@ -280,5 +282,12 @@ public final class RhapsodySdkWrapper {
 			LOGGER.info("Using new releases from cache");
 			callback.success(data, null);
 		}
+	}
+
+	public Image loadArtistImage(String artistId) {
+		String imageUrl = RHAPSODY_IMAGE_URL.replace("{artist_id}", artistId);
+		imageUrl = imageUrl.replace("{size}.{extension}", "356x237.png");
+
+		return new Image(imageUrl, true);
 	}
 }

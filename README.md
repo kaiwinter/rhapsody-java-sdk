@@ -10,8 +10,10 @@ The following REST methods are currently available:
 * /v1/genres
 * /v1/genres/{genreId}/albums/new
 * /v1/albums/{albumId}
+* /v1/albums/new
 * /v1/artists/{artistId}
 * /v1/artists/{artistId}/bio
+* /v1/me/account
 
 The REST service is triggered with the help of [retrofit](https://github.com/square/retrofit).
 Thanks to retrofit adding more REST methods to the wrapper can be done with very little effort.

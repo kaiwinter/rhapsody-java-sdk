@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.rhapsody.cache.DataCache;
 import com.github.kaiwinter.rhapsody.model.AccessTokenResponse;
+import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
+import com.github.kaiwinter.rhapsody.service.MemberService;
 import com.github.kaiwinter.rhapsody.service.AlbumService;
 import com.github.kaiwinter.rhapsody.service.ArtistService;
 import com.github.kaiwinter.rhapsody.service.AuthorizingService;
@@ -65,6 +67,7 @@ public final class RhapsodySdkWrapper {
 	private final GenreService genreService;
 	private final ArtistService artistService;
 	private final AlbumService albumService;
+	private final MemberService memberService;
 
 	private final DataCache dataCache;
 
@@ -117,6 +120,7 @@ public final class RhapsodySdkWrapper {
 		genreService = restAdapter.create(GenreService.class);
 		artistService = restAdapter.create(ArtistService.class);
 		albumService = restAdapter.create(AlbumService.class);
+		memberService = restAdapter.create(MemberService.class);
 
 		dataCache = new DataCache();
 
@@ -289,5 +293,10 @@ public final class RhapsodySdkWrapper {
 		imageUrl = imageUrl.replace("{size}.{extension}", "356x237.png");
 
 		return new Image(imageUrl, true);
+	}
+
+	public void loadAccount(Callback<AccountData> callback) {
+		LOGGER.info("Loading account information");
+		memberService.getAccount("Bearer " + accessToken, prettyJson, callback);
 	}
 }

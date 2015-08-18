@@ -16,11 +16,11 @@ import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
-import com.github.kaiwinter.rhapsody.service.MemberService;
 import com.github.kaiwinter.rhapsody.service.AlbumService;
 import com.github.kaiwinter.rhapsody.service.ArtistService;
 import com.github.kaiwinter.rhapsody.service.AuthorizingService;
 import com.github.kaiwinter.rhapsody.service.GenreService;
+import com.github.kaiwinter.rhapsody.service.MemberService;
 
 import javafx.scene.image.Image;
 import retrofit.Callback;
@@ -264,14 +264,15 @@ public final class RhapsodySdkWrapper {
 		genreService.getGenres("Bearer " + accessToken, prettyJson, catalog, callback);
 	}
 
-	public void loadAlbumNewReleases(Callback<Collection<AlbumData>> callback) {
-		Collection<AlbumData> data = dataCache.getNewReleases("rhapsody");
+	public void loadAlbumNewReleases(Callback<Collection<AlbumData>> callback, String userId) {
+		String cacheId = "rhapsody" + userId;
+		Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
 		if (data == null) {
-			LOGGER.info("Loading new releases from server [RHAPSODY]");
-			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback("rhapsody", callback);
-			albumService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, callbackExt);
+			LOGGER.info("Loading curated album releases from server");
+			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, callback);
+			albumService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, userId, callbackExt);
 		} else {
-			LOGGER.info("Using new releases from cache [RHAPSODY]");
+			LOGGER.info("Using curated album releases from cache");
 			callback.success(data, null);
 		}
 	}
@@ -279,11 +280,11 @@ public final class RhapsodySdkWrapper {
 	public void loadGenreNewReleases(String genreId, Callback<Collection<AlbumData>> callback) {
 		Collection<AlbumData> data = dataCache.getNewReleases(genreId);
 		if (data == null) {
-			LOGGER.info("Loading new releases from server");
+			LOGGER.info("Loading genre new releases from server");
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
 			genreService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, genreId, null, callbackExt);
 		} else {
-			LOGGER.info("Using new releases from cache");
+			LOGGER.info("Using genre new releases from cache");
 			callback.success(data, null);
 		}
 	}

@@ -2,6 +2,7 @@ package com.github.kaiwinter.rhapsody.service;
 
 import java.util.Collection;
 
+import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import retrofit.Callback;
@@ -40,14 +41,21 @@ public interface AlbumService {
 			Callback<AlbumData> callBack);
 
 	/**
-	 * Returns a list of all new releases, curated by Rhapsody.
-	 * 
+	 * Returns a list of new releases, curated by Rhapsody. This list can be personalized for the user by passing the <code>userId</code>.
+	 * The personalization is made by Rhapsody based upon recent listening history.
+	 *
+	 * <p>
+	 * <i>Hint:</i> The <code>userId</code> is the {@link AccountData#id}.
+	 * </p>
+	 *
 	 * @param authorization
 	 *            the access token
 	 * @param pretty
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
 	 *            countries' catalog (two-letter country code, which is case-sensitive)
+	 * @param guid
+	 *            the user ID to get personalized new releases, if <code>null</code>no personalization is made
 	 * @param callBack
 	 *            callback to which the result is passed
 	 */
@@ -56,5 +64,6 @@ public interface AlbumService {
 			@Header("Authorization") String authorization, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
+			@Query("guid") String userId, //
 			Callback<Collection<AlbumData>> callBack);
 }

@@ -18,7 +18,7 @@ import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
 import com.github.kaiwinter.rhapsody.service.AlbumService;
 import com.github.kaiwinter.rhapsody.service.ArtistService;
-import com.github.kaiwinter.rhapsody.service.AuthorizingService;
+import com.github.kaiwinter.rhapsody.service.AuthenticationService;
 import com.github.kaiwinter.rhapsody.service.GenreService;
 import com.github.kaiwinter.rhapsody.service.MemberService;
 
@@ -62,7 +62,7 @@ public final class RhapsodySdkWrapper {
 	/** If true the responses of API requests will be formatted for better readability. Useful with higher LogLevel of the RestAdapter. */
 	private final boolean prettyJson;
 
-	private final AuthorizingService authService;
+	private final AuthenticationService authService;
 	private final GenreService genreService;
 	private final ArtistService artistService;
 	private final AlbumService albumService;
@@ -115,7 +115,7 @@ public final class RhapsodySdkWrapper {
 		this.apiSecret = apiSecret;
 
 		RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(API_URL).build();
-		authService = restAdapter.create(AuthorizingService.class);
+		authService = restAdapter.create(AuthenticationService.class);
 		genreService = restAdapter.create(GenreService.class);
 		artistService = restAdapter.create(ArtistService.class);
 		albumService = restAdapter.create(AlbumService.class);

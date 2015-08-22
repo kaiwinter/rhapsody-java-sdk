@@ -22,7 +22,6 @@ import com.github.kaiwinter.rhapsody.service.AuthorizingService;
 import com.github.kaiwinter.rhapsody.service.GenreService;
 import com.github.kaiwinter.rhapsody.service.MemberService;
 
-import javafx.scene.image.Image;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RestAdapter.LogLevel;
@@ -365,13 +364,32 @@ public final class RhapsodySdkWrapper {
 		}
 	}
 
-	public Image loadArtistImage(String artistId) {
+	/**
+	 * Generate a valid request URL for an artist image.
+	 *
+	 * @param artistId
+	 *            the ID of the artist
+	 * @param imageSize
+	 *            the size of the image
+	 * @return image URL
+	 */
+	public String getArtistImageUrl(String artistId, ArtistImageSize imageSize) {
 		String imageUrl = RHAPSODY_IMAGE_URL.replace("{artist_id}", artistId);
-		imageUrl = imageUrl.replace("{size}.{extension}", "356x237.png");
+		imageUrl = imageUrl.replace("{size}.{extension}", imageSize.getSize() + ".png");
 
-		return new Image(imageUrl, true);
+		return imageUrl;
 	}
 
+	/**
+	 * Loads the user account ({@link AccountData}).
+	 *
+	 * <p>
+	 * REST-method: <code>/me/account</code>
+	 * </p>
+	 *
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
 	public void loadAccount(Callback<AccountData> callback) {
 		LOGGER.info("Loading account information");
 		memberService.getAccount("Bearer " + accessToken, prettyJson, callback);

@@ -244,27 +244,89 @@ public final class RhapsodySdkWrapper {
 		});
 	}
 
+	/**
+	 * Loads the album with the given <code>albumId</code> asynchronously.
+	 *
+	 * <p>
+	 * REST-method: <code>/albums/{albumId}</code>
+	 * </p>
+	 *
+	 * @param albumId
+	 *            the ID of the album to load
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
 	public void loadAlbum(String albumId, Callback<AlbumData> callback) {
 		LOGGER.info("Loading album {}", albumId);
 		albumService.getAlbum("Bearer " + accessToken, prettyJson, catalog, albumId, callback);
 	}
 
+	/**
+	 * Loads the artist's metadata ({@link ArtistData}) with the given <code>artistId</code> asynchronously.
+	 *
+	 * <p>
+	 * REST-method: <code>/artists/{artistId}</code>
+	 * </p>
+	 *
+	 * @param artistId
+	 *            the ID of the artist to load
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
 	public void loadArtistMeta(String artistId, Callback<ArtistData> callback) {
 		LOGGER.info("Loading artist's {} info", artistId);
 		artistService.getArtist("Bearer " + accessToken, prettyJson, catalog, artistId, callback);
 	}
 
+	/**
+	 * Loads the artist's biography ({@link ArtistBio}) with the given <code>artistId</code> asynchronously.
+	 *
+	 * <p>
+	 * REST-method: <code>/artists/{artistId}/bio</code>
+	 * </p>
+	 *
+	 * @param artistId
+	 *            the ID of the artist to load
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
 	public void loadArtistBio(String artistId, Callback<BioData> callback) {
 		LOGGER.info("Loading artist's {} bio", artistId);
 		artistService.getBio("Bearer " + accessToken, prettyJson, catalog, artistId, callback);
 	}
 
+	/**
+	 * Loads Rhapsody genres asynchronously.
+	 *
+	 * <p>
+	 * REST-method: <code>/genres</code>
+	 * </p>
+	 *
+	 * @param artistId
+	 *            the ID of the artist to load
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
 	public void loadGenres(Callback<Collection<GenreData>> callback) {
 		LOGGER.info("Loading genres");
 		genreService.getGenres("Bearer " + accessToken, prettyJson, catalog, callback);
 	}
 
-	public void loadAlbumNewReleases(Callback<Collection<AlbumData>> callback, String userId) {
+	/**
+	 * Loads new releases, curated by Rhapsody asynchronously. This list can be personalized for the user by passing the <code>userId</code>
+	 * . The personalization is made by Rhapsody based upon recent listening history. If <code>userId</code> is <code>null</code> the
+	 * parameter is ignored.
+	 *
+	 * <p>
+	 * REST-method: <code>/albums/new</code>
+	 * </p>
+	 *
+	 * @param userId
+	 *            the <code>guid</code> of the user, may be <code>null</code>
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadAlbumNewReleases(String userId, Callback<Collection<AlbumData>> callback) {
 		String cacheId = "rhapsody" + userId;
 		Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
 		if (data == null) {
@@ -277,12 +339,26 @@ public final class RhapsodySdkWrapper {
 		}
 	}
 
-	public void loadGenreNewReleases(String genreId, Callback<Collection<AlbumData>> callback) {
+	/**
+	 * Loads all new releases for the genre with the given <code>genreId</code> asynchronously.
+	 *
+	 * <p>
+	 * REST-method: <code>/genres/{genreId}/albums/new</code>
+	 * </p>
+	 *
+	 * @param genreId
+	 *            the ID of the genre to load new releases
+	 * @param limit
+	 *            the number of releases to load, if <code>null</code> the default value is used (20)
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadGenreNewReleases(String genreId, Integer limit, Callback<Collection<AlbumData>> callback) {
 		Collection<AlbumData> data = dataCache.getNewReleases(genreId);
 		if (data == null) {
 			LOGGER.info("Loading genre new releases from server");
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
-			genreService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, genreId, null, callbackExt);
+			genreService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, genreId, limit, callbackExt);
 		} else {
 			LOGGER.info("Using genre new releases from cache");
 			callback.success(data, null);

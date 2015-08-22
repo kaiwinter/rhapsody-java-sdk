@@ -54,7 +54,7 @@ public interface AlbumService {
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
 	 *            countries' catalog (two-letter country code, which is case-sensitive)
-	 * @param guid
+	 * @param userId
 	 *            the user ID to get personalized new releases, if <code>null</code>no personalization is made
 	 * @param callBack
 	 *            callback to which the result is passed

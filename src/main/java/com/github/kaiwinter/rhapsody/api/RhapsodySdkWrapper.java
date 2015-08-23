@@ -56,9 +56,7 @@ public final class RhapsodySdkWrapper {
 	/** The Rhapsody app API secret. */
 	private final String apiSecret;
 
-	/** If true the responses of API requests will be formatted for better readability. Useful with higher LogLevel of the RestAdapter. */
-	private final boolean prettyJson;
-
+	private final RestAdapter restAdapter;
 	private final AuthenticationService authService;
 	private final GenreService genreService;
 	private final ArtistService artistService;
@@ -70,6 +68,9 @@ public final class RhapsodySdkWrapper {
 	private final AuthorizationStore authenticationStore;
 
 	private AuthorizationInfo authorizationInfo;
+
+	/** If true the responses of API requests will be formatted for better readability. Useful with higher LogLevel of the RestAdapter. */
+	private boolean prettyJson;
 
 	/**
 	 * Initializes the API wrapper. Provide the API key and API secret of your app from here:
@@ -84,7 +85,7 @@ public final class RhapsodySdkWrapper {
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
 	public RhapsodySdkWrapper(String apiKey, String apiSecret) {
-		this(apiKey, apiSecret, null, false);
+		this(apiKey, apiSecret, null);
 	}
 
 	/**
@@ -98,13 +99,11 @@ public final class RhapsodySdkWrapper {
 	 * @param authenticationStore
 	 *            {@link AuthorizationStore} implementation to persist user authentication data. If <code>null</code> they are not
 	 *            persisted.
-	 * @param verboseLogging
-	 *            if <code>true</code> sets retrofit's log level to {@link LogLevel#FULL}
 	 *
 	 * @throws IllegalArgumentException
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
-	public RhapsodySdkWrapper(String apiKey, String apiSecret, AuthorizationStore authenticationStore, boolean verboseLogging) {
+	public RhapsodySdkWrapper(String apiKey, String apiSecret, AuthorizationStore authenticationStore) {
 		if (apiKey == null) {
 			throw new IllegalArgumentException("API Key must not be null");
 		}
@@ -119,7 +118,7 @@ public final class RhapsodySdkWrapper {
 			this.authenticationStore = authenticationStore;
 		}
 
-		RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(API_URL).build();
+		restAdapter = new RestAdapter.Builder().setEndpoint(API_URL).build();
 		authService = restAdapter.create(AuthenticationService.class);
 		genreService = restAdapter.create(GenreService.class);
 		artistService = restAdapter.create(ArtistService.class);
@@ -129,8 +128,16 @@ public final class RhapsodySdkWrapper {
 		dataCache = new DataCache();
 
 		authorizationInfo = this.authenticationStore.loadAuthorizationInfo();
+	}
 
-		if (verboseLogging) {
+	/**
+	 * Enabled/Disables full logging of retrofit REST calls.
+	 * 
+	 * @param enabled
+	 *            if <code>true</code> sets retrofit's log level to {@link LogLevel#FULL}
+	 */
+	public void setVerboseLoggingEnabled(boolean enabled) {
+		if (enabled) {
 			restAdapter.setLogLevel(LogLevel.FULL);
 			prettyJson = true;
 		} else {

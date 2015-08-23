@@ -65,7 +65,7 @@ public final class RhapsodySdkWrapper {
 
 	private final DataCache dataCache;
 
-	private final AuthorizationStore authenticationStore;
+	private final AuthorizationStore authorizationStore;
 
 	private AuthorizationInfo authorizationInfo;
 
@@ -96,14 +96,14 @@ public final class RhapsodySdkWrapper {
 	 *            the API Key, not <code>null</code>
 	 * @param apiSecret
 	 *            the API Secret, not <code>null</code>
-	 * @param authenticationStore
+	 * @param authorizationStore
 	 *            {@link AuthorizationStore} implementation to persist user authentication data. If <code>null</code> they are not
 	 *            persisted.
 	 *
 	 * @throws IllegalArgumentException
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
-	public RhapsodySdkWrapper(String apiKey, String apiSecret, AuthorizationStore authenticationStore) {
+	public RhapsodySdkWrapper(String apiKey, String apiSecret, AuthorizationStore authorizationStore) {
 		if (apiKey == null) {
 			throw new IllegalArgumentException("API Key must not be null");
 		}
@@ -112,10 +112,10 @@ public final class RhapsodySdkWrapper {
 		}
 		this.apiKey = apiKey;
 		this.apiSecret = apiSecret;
-		if (authenticationStore == null) {
-			this.authenticationStore = new TransientAuthorizationStore();
+		if (authorizationStore == null) {
+			this.authorizationStore = new TransientAuthorizationStore();
 		} else {
-			this.authenticationStore = authenticationStore;
+			this.authorizationStore = authorizationStore;
 		}
 
 		restAdapter = new RestAdapter.Builder().setEndpoint(API_URL).build();
@@ -127,7 +127,7 @@ public final class RhapsodySdkWrapper {
 
 		dataCache = new DataCache();
 
-		authorizationInfo = this.authenticationStore.loadAuthorizationInfo();
+		authorizationInfo = this.authorizationStore.loadAuthorizationInfo();
 	}
 
 	/**
@@ -149,7 +149,7 @@ public final class RhapsodySdkWrapper {
 	 * Removes the authentication information from the store. Use this method to log out the user.
 	 */
 	public void clearAuthorization() {
-		authenticationStore.clearAuthorization();
+		authorizationStore.clearAuthorization();
 		authorizationInfo.accessToken = null;
 		authorizationInfo.refreshToken = null;
 		authorizationInfo.catalog = null;
@@ -175,7 +175,7 @@ public final class RhapsodySdkWrapper {
 			public void success(AccessTokenResponse authorizationResponse, Response response) {
 				LOGGER.info("Successfully authorized, access token: {}", authorizationResponse.access_token);
 				authorizationInfo = new AuthorizationInfo(authorizationResponse);
-				authenticationStore.saveAuthorizationInfo(authorizationInfo);
+				authorizationStore.saveAuthorizationInfo(authorizationInfo);
 
 				if (loginCallback != null) {
 					loginCallback.success();
@@ -220,7 +220,7 @@ public final class RhapsodySdkWrapper {
 			public void success(AccessTokenResponse authorizationResponse, Response response) {
 				LOGGER.info("Successfully refreshed token, access token: {}", authorizationResponse.access_token);
 				authorizationInfo = new AuthorizationInfo(authorizationResponse);
-				authenticationStore.saveAuthorizationInfo(authorizationInfo);
+				authorizationStore.saveAuthorizationInfo(authorizationInfo);
 
 				callback.success();
 			}

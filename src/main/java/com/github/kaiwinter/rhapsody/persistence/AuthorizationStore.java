@@ -24,8 +24,7 @@ public interface AuthorizationStore {
 	void saveAuthorizationInfo(AuthorizationInfo authorizationInfo);
 
 	/**
-	 * Removes the authentication information from Store. Use this method to log out the user.
+	 * Removes the authentication information from Store.
 	 */
 	void clearAuthorization();
-
 }

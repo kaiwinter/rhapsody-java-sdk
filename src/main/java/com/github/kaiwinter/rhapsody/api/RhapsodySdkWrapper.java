@@ -2,7 +2,6 @@ package com.github.kaiwinter.rhapsody.api;
 
 import java.util.Base64;
 import java.util.Collection;
-import java.util.prefs.Preferences;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,9 @@ import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
+import com.github.kaiwinter.rhapsody.persistence.AuthorizationStore;
+import com.github.kaiwinter.rhapsody.persistence.impl.TransientAuthorizationStore;
+import com.github.kaiwinter.rhapsody.persistence.model.AuthorizationInfo;
 import com.github.kaiwinter.rhapsody.service.AlbumService;
 import com.github.kaiwinter.rhapsody.service.ArtistService;
 import com.github.kaiwinter.rhapsody.service.AuthenticationService;
@@ -28,7 +30,6 @@ import retrofit.RestAdapter.LogLevel;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-// FIXME KW: replace java.util.Preferences to make this more platform independent, esp. to allow usage on android
 /**
  * Wrapper for the Rhapsody REST API. It can be used with a Rhapsody account as well as with a Napster account. This class handles the
  * authorization (user login) against the server and stores the received access and refresh token.
@@ -49,10 +50,6 @@ public final class RhapsodySdkWrapper {
 	private static final String API_URL = "https://api.rhapsody.com";
 	private static final String RHAPSODY_IMAGE_URL = "http://direct.rhapsody.com/imageserver/v2/artists/{artist_id}/images/{size}.{extension}";
 
-	private static final String PROPERTY_ACCESS_TOKEN = "access_token";
-	private static final String PROPERTY_REFRESH_TOKEN = "refresh_token";
-	private static final String PROPERTY_CATALOG = "catalog";
-
 	/** The Rhapsody app API key. */
 	private final String apiKey;
 
@@ -70,9 +67,9 @@ public final class RhapsodySdkWrapper {
 
 	private final DataCache dataCache;
 
-	private String accessToken;
-	private String refreshToken;
-	private String catalog;
+	private final AuthorizationStore authenticationStore;
+
+	private AuthorizationInfo authorizationInfo;
 
 	/**
 	 * Initializes the API wrapper. Provide the API key and API secret of your app from here:
@@ -87,7 +84,7 @@ public final class RhapsodySdkWrapper {
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
 	public RhapsodySdkWrapper(String apiKey, String apiSecret) {
-		this(apiKey, apiSecret, false);
+		this(apiKey, apiSecret, null, false);
 	}
 
 	/**
@@ -98,13 +95,16 @@ public final class RhapsodySdkWrapper {
 	 *            the API Key, not <code>null</code>
 	 * @param apiSecret
 	 *            the API Secret, not <code>null</code>
+	 * @param authenticationStore
+	 *            {@link AuthorizationStore} implementation to persist user authentication data. If <code>null</code> they are not
+	 *            persisted.
 	 * @param verboseLogging
 	 *            if <code>true</code> sets retrofit's log level to {@link LogLevel#FULL}
 	 *
 	 * @throws IllegalArgumentException
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
-	public RhapsodySdkWrapper(String apiKey, String apiSecret, boolean verboseLogging) {
+	public RhapsodySdkWrapper(String apiKey, String apiSecret, AuthorizationStore authenticationStore, boolean verboseLogging) {
 		if (apiKey == null) {
 			throw new IllegalArgumentException("API Key must not be null");
 		}
@@ -113,6 +113,11 @@ public final class RhapsodySdkWrapper {
 		}
 		this.apiKey = apiKey;
 		this.apiSecret = apiSecret;
+		if (authenticationStore == null) {
+			this.authenticationStore = new TransientAuthorizationStore();
+		} else {
+			this.authenticationStore = authenticationStore;
+		}
 
 		RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(API_URL).build();
 		authService = restAdapter.create(AuthenticationService.class);
@@ -123,7 +128,7 @@ public final class RhapsodySdkWrapper {
 
 		dataCache = new DataCache();
 
-		loadAuthorizationInfo();
+		authorizationInfo = this.authenticationStore.loadAuthorizationInfo();
 
 		if (verboseLogging) {
 			restAdapter.setLogLevel(LogLevel.FULL);
@@ -133,31 +138,14 @@ public final class RhapsodySdkWrapper {
 		}
 	}
 
-	private void loadAuthorizationInfo() {
-		Preferences preferences = Preferences.userNodeForPackage(getClass());
-		accessToken = preferences.get(PROPERTY_ACCESS_TOKEN, null);
-		refreshToken = preferences.get(PROPERTY_REFRESH_TOKEN, null);
-		catalog = preferences.get(PROPERTY_CATALOG, null);
-	}
-
-	private void saveAuthorizationInfo(AccessTokenResponse authorizationResponse) {
-		Preferences userNodeForPackage = Preferences.userNodeForPackage(getClass());
-		userNodeForPackage.put(PROPERTY_ACCESS_TOKEN, authorizationResponse.access_token);
-		userNodeForPackage.put(PROPERTY_REFRESH_TOKEN, authorizationResponse.refresh_token);
-		userNodeForPackage.put(PROPERTY_CATALOG, authorizationResponse.catalog);
-	}
-
 	/**
-	 * Removes the authentication information from the Preferences store. Use this method to log out the user.
+	 * Removes the authentication information from the store. Use this method to log out the user.
 	 */
 	public void clearAuthorization() {
-		Preferences preferences = Preferences.userNodeForPackage(getClass());
-		preferences.remove(PROPERTY_ACCESS_TOKEN);
-		preferences.remove(PROPERTY_REFRESH_TOKEN);
-		preferences.remove(PROPERTY_CATALOG);
-		accessToken = null;
-		refreshToken = null;
-		catalog = null;
+		authenticationStore.clearAuthorization();
+		authorizationInfo.accessToken = null;
+		authorizationInfo.refreshToken = null;
+		authorizationInfo.catalog = null;
 	}
 
 	/**
@@ -179,10 +167,8 @@ public final class RhapsodySdkWrapper {
 			@Override
 			public void success(AccessTokenResponse authorizationResponse, Response response) {
 				LOGGER.info("Successfully authorized, access token: {}", authorizationResponse.access_token);
-				accessToken = authorizationResponse.access_token;
-				refreshToken = authorizationResponse.refresh_token;
-				catalog = authorizationResponse.catalog;
-				saveAuthorizationInfo(authorizationResponse);
+				authorizationInfo = new AuthorizationInfo(authorizationResponse);
+				authenticationStore.saveAuthorizationInfo(authorizationInfo);
 
 				if (loginCallback != null) {
 					loginCallback.success();
@@ -213,23 +199,21 @@ public final class RhapsodySdkWrapper {
 	public void refreshToken(AuthenticationCallback callback) {
 		LOGGER.info("Refreshing Token");
 
-		if (refreshToken == null) {
+		if (authorizationInfo.refreshToken == null) {
 			LOGGER.warn("No refresh token available, make an authorization request before trying a refresh request.");
 		}
 		RefreshToken refreshTokenObj = new RefreshToken();
 		refreshTokenObj.client_id = apiKey;
 		refreshTokenObj.client_secret = apiSecret;
-		refreshTokenObj.refresh_token = refreshToken;
+		refreshTokenObj.refresh_token = authorizationInfo.refreshToken;
 
 		authService.refreshAuthorization(refreshTokenObj, new Callback<AccessTokenResponse>() {
 
 			@Override
 			public void success(AccessTokenResponse authorizationResponse, Response response) {
 				LOGGER.info("Successfully refreshed token, access token: {}", authorizationResponse.access_token);
-				accessToken = authorizationResponse.access_token;
-				refreshToken = authorizationResponse.refresh_token;
-				catalog = authorizationResponse.catalog;
-				saveAuthorizationInfo(authorizationResponse);
+				authorizationInfo = new AuthorizationInfo(authorizationResponse);
+				authenticationStore.saveAuthorizationInfo(authorizationInfo);
 
 				callback.success();
 			}
@@ -241,6 +225,11 @@ public final class RhapsodySdkWrapper {
 				callback.failure(error.getResponse().getStatus(), error.getResponse().getReason());
 			}
 		});
+	}
+
+	private String getAuthorizationString() {
+		String authorization = "Bearer " + authorizationInfo.accessToken;
+		return authorization;
 	}
 
 	/**
@@ -257,7 +246,8 @@ public final class RhapsodySdkWrapper {
 	 */
 	public void loadAlbum(String albumId, Callback<AlbumData> callback) {
 		LOGGER.info("Loading album {}", albumId);
-		albumService.getAlbum("Bearer " + accessToken, prettyJson, catalog, albumId, callback);
+		String authorization = getAuthorizationString();
+		albumService.getAlbum(authorization, prettyJson, authorizationInfo.catalog, albumId, callback);
 	}
 
 	/**
@@ -274,7 +264,8 @@ public final class RhapsodySdkWrapper {
 	 */
 	public void loadArtistMeta(String artistId, Callback<ArtistData> callback) {
 		LOGGER.info("Loading artist's {} info", artistId);
-		artistService.getArtist("Bearer " + accessToken, prettyJson, catalog, artistId, callback);
+		String authorization = getAuthorizationString();
+		artistService.getArtist(authorization, prettyJson, authorizationInfo.catalog, artistId, callback);
 	}
 
 	/**
@@ -291,7 +282,8 @@ public final class RhapsodySdkWrapper {
 	 */
 	public void loadArtistBio(String artistId, Callback<BioData> callback) {
 		LOGGER.info("Loading artist's {} bio", artistId);
-		artistService.getBio("Bearer " + accessToken, prettyJson, catalog, artistId, callback);
+		String authorization = getAuthorizationString();
+		artistService.getBio(authorization, prettyJson, authorizationInfo.catalog, artistId, callback);
 	}
 
 	/**
@@ -308,7 +300,8 @@ public final class RhapsodySdkWrapper {
 	 */
 	public void loadGenres(Callback<Collection<GenreData>> callback) {
 		LOGGER.info("Loading genres");
-		genreService.getGenres("Bearer " + accessToken, prettyJson, catalog, callback);
+		String authorization = getAuthorizationString();
+		genreService.getGenres(authorization, prettyJson, authorizationInfo.catalog, callback);
 	}
 
 	/**
@@ -330,8 +323,9 @@ public final class RhapsodySdkWrapper {
 		Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
 		if (data == null) {
 			LOGGER.info("Loading curated album releases from server");
+			String authorization = getAuthorizationString();
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, callback);
-			albumService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, userId, callbackExt);
+			albumService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, userId, callbackExt);
 		} else {
 			LOGGER.info("Using curated album releases from cache");
 			callback.success(data, null);
@@ -356,8 +350,9 @@ public final class RhapsodySdkWrapper {
 		Collection<AlbumData> data = dataCache.getNewReleases(genreId);
 		if (data == null) {
 			LOGGER.info("Loading genre new releases from server");
+			String authorization = getAuthorizationString();
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
-			genreService.getNewReleases("Bearer " + accessToken, prettyJson, catalog, genreId, limit, callbackExt);
+			genreService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, genreId, limit, callbackExt);
 		} else {
 			LOGGER.info("Using genre new releases from cache");
 			callback.success(data, null);
@@ -392,6 +387,7 @@ public final class RhapsodySdkWrapper {
 	 */
 	public void loadAccount(Callback<AccountData> callback) {
 		LOGGER.info("Loading account information");
-		memberService.getAccount("Bearer " + accessToken, prettyJson, callback);
+		String authorization = getAuthorizationString();
+		memberService.getAccount(authorization, prettyJson, callback);
 	}
 }

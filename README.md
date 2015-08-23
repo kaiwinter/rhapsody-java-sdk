@@ -60,6 +60,20 @@ Thanks to retrofit adding more REST methods to the wrapper can be done with very
 	10:54:25.853 [INFO ] RhapsodySdkWrapper - Loading genres
 	Loaded 21 genres
 
+## Maven
+rhapsody-java-sdk is not on Maven Central. Find it on [JitPack.io](https://jitpack.io/#kaiwinter/rhapsody-java-sdk/v1.1.0)
+```xml
+<repository>
+	 <id>jitpack.io</id>
+	 <url>https://jitpack.io</url>
+</repository>
+
+<dependency>
+	 <groupId>com.github.kaiwinter</groupId>
+	 <artifactId>rhapsody-java-sdk</artifactId>
+	 <version>v1.1.0</version>
+</dependency>
+```
 
 ## License
      Copyright 2015 Kai Winter

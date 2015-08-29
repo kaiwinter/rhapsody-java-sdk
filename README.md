@@ -26,7 +26,7 @@ Thanks to retrofit adding more REST methods to the wrapper can be done with very
 		private static RhapsodySdkWrapper rhapsodySdkWrapper;
 
 		public static void main(String[] args) {
-			rhapsodySdkWrapper = new RhapsodySdkWrapper(API_KEY, API_SECRET);
+			rhapsodySdkWrapper = new RhapsodySdkWrapper(API_KEY, API_SECRET, new PreferencesAuthorizationStore());
 			String username = "ask user";
 			String password = "ask user";
 			rhapsodySdkWrapper.authorize(username, password, new AuthenticationCallback() {

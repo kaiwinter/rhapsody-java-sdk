@@ -13,6 +13,7 @@ The following REST methods are currently available:
 * /v1/albums/new
 * /v1/artists/{artistId}
 * /v1/artists/{artistId}/bio
+* /v1/artists/{artistId}/albums/new
 * /v1/me/account
 
 The REST service is triggered with the help of [retrofit](https://github.com/square/retrofit).

@@ -2,6 +2,7 @@ package com.github.kaiwinter.rhapsody.api;
 
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public final class RhapsodySdkWrapper {
 	 * @param apiSecret
 	 *            the API Secret, not <code>null</code>
 	 *
-	 * @throws IllegalArgumentException
+	 * @throws NullPointerException
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
 	public RhapsodySdkWrapper(String apiKey, String apiSecret) {
@@ -100,16 +101,13 @@ public final class RhapsodySdkWrapper {
 	 *            {@link AuthorizationStore} implementation to persist user authentication data. If <code>null</code> they are not
 	 *            persisted.
 	 *
-	 * @throws IllegalArgumentException
+	 * @throws NullPointerException
 	 *             if <code>apiKey</code> or <code>apiSecret</code> is <code>null</code>
 	 */
 	public RhapsodySdkWrapper(String apiKey, String apiSecret, AuthorizationStore authorizationStore) {
-		if (apiKey == null) {
-			throw new IllegalArgumentException("API Key must not be null");
-		}
-		if (apiSecret == null) {
-			throw new IllegalArgumentException("API Secret must not be null");
-		}
+		Objects.requireNonNull(apiKey, "API Key must not be null");
+		Objects.requireNonNull(apiSecret, "API Secret must not be null");
+
 		this.apiKey = apiKey;
 		this.apiSecret = apiSecret;
 		if (authorizationStore == null) {
@@ -396,5 +394,22 @@ public final class RhapsodySdkWrapper {
 		LOGGER.info("Loading account information");
 		String authorization = getAuthorizationString();
 		memberService.getAccount(authorization, prettyJson, callback);
+	}
+
+	/**
+	 * Synchronously returns a list of an artist's new releases (if any), updated weekly.
+	 * 
+	 * @param artistId
+	 *            the ID of the artist
+	 * @param limit
+	 *            the number of releases to load, if <code>null</code> the default value is used (20)
+	 * @return a list of an artist's new releases
+	 */
+	public Collection<AlbumData> getArtistNewReleases(String artistId, Integer limit) {
+		LOGGER.info("Loading artist new releases");
+		String authorization = getAuthorizationString();
+		Collection<AlbumData> newReleases = artistService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, artistId);
+
+		return newReleases;
 	}
 }

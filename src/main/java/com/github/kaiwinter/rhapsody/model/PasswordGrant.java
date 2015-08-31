@@ -1,10 +1,12 @@
 package com.github.kaiwinter.rhapsody.model;
 
-public class PasswordGrant {
-
-	public String username;
-	public String password;
-	public String grant_type = "password";
+/**
+ * Data structure for the authentication request by password against the Rhapsody API.
+ */
+public final class PasswordGrant {
+	public final String username;
+	public final String password;
+	public final String grant_type = "password";
 
 	public PasswordGrant(String username, String password) {
 		this.username = username;

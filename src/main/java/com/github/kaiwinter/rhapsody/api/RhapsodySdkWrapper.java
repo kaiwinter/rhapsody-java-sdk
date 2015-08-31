@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.rhapsody.cache.DataCache;
-import com.github.kaiwinter.rhapsody.model.AccessTokenResponse;
+import com.github.kaiwinter.rhapsody.model.AccessToken;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
@@ -169,10 +169,10 @@ public final class RhapsodySdkWrapper {
 	public void authorize(String username, String password, AuthenticationCallback loginCallback) {
 		LOGGER.info("Authorizing");
 		String basicAuth = new String(Base64.getEncoder().encode((String.format("%s:%s", apiKey, apiSecret).getBytes())));
-		authService.authorizeByPassword(basicAuth, new PasswordGrant(username, password), new Callback<AccessTokenResponse>() {
+		authService.authorizeByPassword(basicAuth, new PasswordGrant(username, password), new Callback<AccessToken>() {
 
 			@Override
-			public void success(AccessTokenResponse authorizationResponse, Response response) {
+			public void success(AccessToken authorizationResponse, Response response) {
 				LOGGER.info("Successfully authorized, access token: {}", authorizationResponse.access_token);
 				authorizationInfo = new AuthorizationInfo(authorizationResponse);
 				authorizationStore.saveAuthorizationInfo(authorizationInfo);
@@ -214,10 +214,10 @@ public final class RhapsodySdkWrapper {
 		refreshTokenObj.client_secret = apiSecret;
 		refreshTokenObj.refresh_token = authorizationInfo.refreshToken;
 
-		authService.refreshAuthorization(refreshTokenObj, new Callback<AccessTokenResponse>() {
+		authService.refreshAuthorization(refreshTokenObj, new Callback<AccessToken>() {
 
 			@Override
-			public void success(AccessTokenResponse authorizationResponse, Response response) {
+			public void success(AccessToken authorizationResponse, Response response) {
 				LOGGER.info("Successfully refreshed token, access token: {}", authorizationResponse.access_token);
 				authorizationInfo = new AuthorizationInfo(authorizationResponse);
 				authorizationStore.saveAuthorizationInfo(authorizationInfo);

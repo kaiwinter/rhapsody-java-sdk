@@ -1,6 +1,6 @@
 package com.github.kaiwinter.rhapsody.service;
 
-import com.github.kaiwinter.rhapsody.model.AccessTokenResponse;
+import com.github.kaiwinter.rhapsody.model.AccessToken;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
 
@@ -34,7 +34,7 @@ public interface AuthenticationService {
 	void authorizeByPassword( //
 			@Header("Authorization") String basicAuthentication, //
 			@Body PasswordGrant passwordGrant, //
-			Callback<AccessTokenResponse> callBack);
+			Callback<AccessToken> callBack);
 
 	/**
 	 * Refreshes the access token by sending the refresh token to the server.
@@ -47,5 +47,5 @@ public interface AuthenticationService {
 	@POST("/oauth/access_token")
 	void refreshAuthorization( //
 			@Body RefreshToken refreshToken, //
-			Callback<AccessTokenResponse> callBack);
+			Callback<AccessToken> callBack);
 }

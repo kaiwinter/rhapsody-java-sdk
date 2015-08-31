@@ -1,5 +1,8 @@
 package com.github.kaiwinter.rhapsody.model;
 
+/**
+ * Data structure which gets filled with the result of a REST call to the Rhapsody API.
+ */
 public final class AccountData {
 	public String cobrand;
 	public String cocat;

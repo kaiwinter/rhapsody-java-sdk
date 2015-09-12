@@ -6,5 +6,5 @@ package com.github.kaiwinter.rhapsody.model;
 public final class AccessToken {
 	public String access_token;
 	public String refresh_token;
-	public String catalog;
+	public String catalog; // not contained in token refresh call!
 }

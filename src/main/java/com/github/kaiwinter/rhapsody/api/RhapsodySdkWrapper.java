@@ -130,7 +130,7 @@ public final class RhapsodySdkWrapper {
 
 	/**
 	 * Enabled/Disables full logging of retrofit REST calls.
-	 * 
+	 *
 	 * @param enabled
 	 *            if <code>true</code> sets retrofit's log level to {@link LogLevel#FULL}
 	 */
@@ -172,7 +172,10 @@ public final class RhapsodySdkWrapper {
 			@Override
 			public void success(AccessToken authorizationResponse, Response response) {
 				LOGGER.info("Successfully authorized, access token: {}", authorizationResponse.access_token);
-				authorizationInfo = new AuthorizationInfo(authorizationResponse);
+				authorizationInfo = new AuthorizationInfo();
+				authorizationInfo.accessToken = authorizationResponse.access_token;
+				authorizationInfo.refreshToken = authorizationResponse.refresh_token;
+				authorizationInfo.catalog = authorizationResponse.catalog;
 				authorizationStore.saveAuthorizationInfo(authorizationInfo);
 
 				if (loginCallback != null) {
@@ -207,17 +210,18 @@ public final class RhapsodySdkWrapper {
 		if (authorizationInfo.refreshToken == null) {
 			LOGGER.warn("No refresh token available, make an authorization request before trying a refresh request.");
 		}
-		RefreshToken refreshTokenObj = new RefreshToken();
-		refreshTokenObj.client_id = apiKey;
-		refreshTokenObj.client_secret = apiSecret;
-		refreshTokenObj.refresh_token = authorizationInfo.refreshToken;
+		RefreshToken refreshToken = new RefreshToken();
+		refreshToken.client_id = apiKey;
+		refreshToken.client_secret = apiSecret;
+		refreshToken.refresh_token = authorizationInfo.refreshToken;
 
-		authService.refreshAuthorization(refreshTokenObj, new Callback<AccessToken>() {
+		authService.refreshAuthorization(refreshToken, new Callback<AccessToken>() {
 
 			@Override
 			public void success(AccessToken authorizationResponse, Response response) {
 				LOGGER.info("Successfully refreshed token, access token: {}", authorizationResponse.access_token);
-				authorizationInfo = new AuthorizationInfo(authorizationResponse);
+				authorizationInfo.accessToken = authorizationResponse.access_token;
+				authorizationInfo.refreshToken = authorizationResponse.refresh_token;
 				authorizationStore.saveAuthorizationInfo(authorizationInfo);
 
 				callback.success();
@@ -398,7 +402,7 @@ public final class RhapsodySdkWrapper {
 
 	/**
 	 * Synchronously returns a list of an artist's new releases (if any), updated weekly.
-	 * 
+	 *
 	 * @param artistId
 	 *            the ID of the artist
 	 * @param limit

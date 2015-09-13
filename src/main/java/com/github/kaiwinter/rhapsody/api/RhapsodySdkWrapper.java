@@ -45,7 +45,7 @@ import retrofit.client.Response;
  * require the user's login data)</li>
  * </ol>
  */
-public final class RhapsodySdkWrapper {
+public class RhapsodySdkWrapper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RhapsodySdkWrapper.class.getSimpleName());
 
 	private static final String API_URL = "https://api.rhapsody.com";

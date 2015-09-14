@@ -69,6 +69,8 @@ public interface ArtistService {
 	 *            countries' catalog (two-letter country code, which is case-sensitive)
 	 * @param artistId
 	 *            the ID of the artist to load
+	 * @param limit
+	 *            the number of releases which are loaded, if <code>null</code> the servers default value is used
 	 * @return a list of an artist's new releases
 	 */
 	@GET("/v1/artists/{artistId}/albums/new")
@@ -76,5 +78,6 @@ public interface ArtistService {
 			@Header("Authorization") String authorization, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
-			@Path("artistId") String artistId);
+			@Path("artistId") String artistId, //
+			@Query("limit") Integer limit);
 }

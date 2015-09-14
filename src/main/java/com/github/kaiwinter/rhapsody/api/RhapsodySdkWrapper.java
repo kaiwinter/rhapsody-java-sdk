@@ -412,7 +412,7 @@ public class RhapsodySdkWrapper {
 	public Collection<AlbumData> getArtistNewReleases(String artistId, Integer limit) {
 		LOGGER.info("Loading artist new releases");
 		String authorization = getAuthorizationString();
-		Collection<AlbumData> newReleases = artistService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, artistId);
+		Collection<AlbumData> newReleases = artistService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, artistId, limit);
 
 		return newReleases;
 	}

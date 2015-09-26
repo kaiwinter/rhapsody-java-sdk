@@ -19,11 +19,11 @@ import com.github.kaiwinter.rhapsody.model.RefreshToken;
 import com.github.kaiwinter.rhapsody.persistence.AuthorizationStore;
 import com.github.kaiwinter.rhapsody.persistence.impl.TransientAuthorizationStore;
 import com.github.kaiwinter.rhapsody.persistence.model.AuthorizationInfo;
-import com.github.kaiwinter.rhapsody.service.AlbumService;
-import com.github.kaiwinter.rhapsody.service.ArtistService;
-import com.github.kaiwinter.rhapsody.service.AuthenticationService;
-import com.github.kaiwinter.rhapsody.service.GenreService;
-import com.github.kaiwinter.rhapsody.service.MemberService;
+import com.github.kaiwinter.rhapsody.service.authentication.AuthenticationService;
+import com.github.kaiwinter.rhapsody.service.member.AccountService;
+import com.github.kaiwinter.rhapsody.service.metadata.AlbumService;
+import com.github.kaiwinter.rhapsody.service.metadata.ArtistService;
+import com.github.kaiwinter.rhapsody.service.metadata.GenreService;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -62,7 +62,7 @@ public class RhapsodySdkWrapper {
 	private final GenreService genreService;
 	private final ArtistService artistService;
 	private final AlbumService albumService;
-	private final MemberService memberService;
+	private final AccountService memberService;
 
 	private final DataCache dataCache;
 
@@ -121,7 +121,7 @@ public class RhapsodySdkWrapper {
 		genreService = restAdapter.create(GenreService.class);
 		artistService = restAdapter.create(ArtistService.class);
 		albumService = restAdapter.create(AlbumService.class);
-		memberService = restAdapter.create(MemberService.class);
+		memberService = restAdapter.create(AccountService.class);
 
 		dataCache = new DataCache();
 

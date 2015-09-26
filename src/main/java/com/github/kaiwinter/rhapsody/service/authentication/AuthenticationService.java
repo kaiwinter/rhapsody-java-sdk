@@ -1,4 +1,4 @@
-package com.github.kaiwinter.rhapsody.service;
+package com.github.kaiwinter.rhapsody.service.authentication;
 
 import com.github.kaiwinter.rhapsody.model.AccessToken;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;

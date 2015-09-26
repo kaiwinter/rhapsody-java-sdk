@@ -1,4 +1,4 @@
-package com.github.kaiwinter.rhapsody.service;
+package com.github.kaiwinter.rhapsody.service.metadata;
 
 import java.util.Collection;
 

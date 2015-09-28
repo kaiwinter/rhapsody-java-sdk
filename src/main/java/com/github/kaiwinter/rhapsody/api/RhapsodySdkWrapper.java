@@ -11,6 +11,7 @@ import com.github.kaiwinter.rhapsody.cache.DataCache;
 import com.github.kaiwinter.rhapsody.model.AccessToken;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
+import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -21,6 +22,7 @@ import com.github.kaiwinter.rhapsody.persistence.impl.TransientAuthorizationStor
 import com.github.kaiwinter.rhapsody.persistence.model.AuthorizationInfo;
 import com.github.kaiwinter.rhapsody.service.authentication.AuthenticationService;
 import com.github.kaiwinter.rhapsody.service.member.AccountService;
+import com.github.kaiwinter.rhapsody.service.member.LibraryService;
 import com.github.kaiwinter.rhapsody.service.metadata.AlbumService;
 import com.github.kaiwinter.rhapsody.service.metadata.ArtistService;
 import com.github.kaiwinter.rhapsody.service.metadata.GenreService;
@@ -63,6 +65,7 @@ public class RhapsodySdkWrapper {
 	private final ArtistService artistService;
 	private final AlbumService albumService;
 	private final AccountService memberService;
+	private final LibraryService libraryService;
 
 	private final DataCache dataCache;
 
@@ -122,6 +125,7 @@ public class RhapsodySdkWrapper {
 		artistService = restAdapter.create(ArtistService.class);
 		albumService = restAdapter.create(AlbumService.class);
 		memberService = restAdapter.create(AccountService.class);
+		libraryService = restAdapter.create(LibraryService.class);
 
 		dataCache = new DataCache();
 
@@ -415,5 +419,58 @@ public class RhapsodySdkWrapper {
 		Collection<AlbumData> newReleases = artistService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, artistId, limit);
 
 		return newReleases;
+	}
+
+	/**
+	 * Loads a list of all artists in the user's library.
+	 *
+	 * <p>
+	 * REST-method: <code>/me/library/artists</code>
+	 * </p>
+	 *
+	 * @param limit
+	 *            the number of releases to load, if <code>null</code> the default value is used (20)
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadAllArtistsInLibrary(Integer limit, Callback<Collection<Artist>> callback) {
+		LOGGER.info("Loading all artists in library");
+		libraryService.loadAllArtistsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
+	}
+
+	/**
+	 * Loads a list of albums in a member’s library by the artist.
+	 *
+	 * <p>
+	 * REST-method: <code>/me/library/artists/{artistId}/albums</code>
+	 * </p>
+	 *
+	 * @param artistId
+	 *            the ID of the artist to load
+	 * @param limit
+	 *            the number of releases to load, if <code>null</code> the default value is used (20)
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadAllAlbumsByArtistInLibrary(String artistId, Integer limit, Callback<Collection<AlbumData>> callback) {
+		LOGGER.info("Loading all albums by artists in library");
+		libraryService.loadAllAlbumsByArtistInLibrary(getAuthorizationString(), prettyJson, artistId, limit, callback);
+	}
+
+	/**
+	 * Loads a list of albums in a member’s library.
+	 *
+	 * <p>
+	 * REST-method: <code>/me/library/albums</code>
+	 * </p>
+	 *
+	 * @param limit
+	 *            the number of releases to load, if <code>null</code> the default value is used (20)
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadAllAlbumsInLibrary(Integer limit, Callback<Collection<AlbumData>> callback) {
+		LOGGER.info("Loading all albums in library");
+		libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
 	}
 }

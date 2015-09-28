@@ -12,6 +12,11 @@ import retrofit.http.Header;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
+/**
+ * Wrapper of the Artist REST API.
+ *
+ * @see https://developer.rhapsody.com/api#artists
+ */
 public interface ArtistService {
 
 	/**

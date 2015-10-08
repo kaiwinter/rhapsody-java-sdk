@@ -2,6 +2,7 @@ package com.github.kaiwinter.rhapsody.api;
 
 import java.util.Base64;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -17,11 +18,16 @@ import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
+import com.github.kaiwinter.rhapsody.model.member.ChartsAlbum;
+import com.github.kaiwinter.rhapsody.model.member.ChartsArtist;
+import com.github.kaiwinter.rhapsody.model.member.ChartsTrack;
 import com.github.kaiwinter.rhapsody.persistence.AuthorizationStore;
 import com.github.kaiwinter.rhapsody.persistence.impl.TransientAuthorizationStore;
 import com.github.kaiwinter.rhapsody.persistence.model.AuthorizationInfo;
 import com.github.kaiwinter.rhapsody.service.authentication.AuthenticationService;
 import com.github.kaiwinter.rhapsody.service.member.AccountService;
+import com.github.kaiwinter.rhapsody.service.member.ChartService;
+import com.github.kaiwinter.rhapsody.service.member.ChartService.RangeEnum;
 import com.github.kaiwinter.rhapsody.service.member.LibraryService;
 import com.github.kaiwinter.rhapsody.service.metadata.AlbumService;
 import com.github.kaiwinter.rhapsody.service.metadata.ArtistService;
@@ -66,6 +72,7 @@ public class RhapsodySdkWrapper {
 	private final AlbumService albumService;
 	private final AccountService memberService;
 	private final LibraryService libraryService;
+	private final ChartService chartService;
 
 	private final DataCache dataCache;
 
@@ -126,6 +133,7 @@ public class RhapsodySdkWrapper {
 		albumService = restAdapter.create(AlbumService.class);
 		memberService = restAdapter.create(AccountService.class);
 		libraryService = restAdapter.create(LibraryService.class);
+		chartService = restAdapter.create(ChartService.class);
 
 		dataCache = new DataCache();
 
@@ -246,7 +254,7 @@ public class RhapsodySdkWrapper {
 	}
 
 	/**
-	 * Loads the album with the given <code>albumId</code> asynchronously.
+	 * Asynchronously loads the album with the given <code>albumId</code> asynchronously.
 	 *
 	 * <p>
 	 * REST-method: <code>/albums/{albumId}</code>
@@ -264,7 +272,24 @@ public class RhapsodySdkWrapper {
 	}
 
 	/**
-	 * Loads the artist's metadata ({@link ArtistData}) with the given <code>artistId</code> asynchronously.
+	 * Synchronously loads the album with the given <code>albumId</code> synchronously.
+	 *
+	 * <p>
+	 * REST-method: <code>/albums/{albumId}</code>
+	 * </p>
+	 *
+	 * @param albumId
+	 *            the ID of the album to load
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public AlbumData getAlbum(String albumId) {
+		LOGGER.info("Loading album {}", albumId);
+		return albumService.getAlbum(getAuthorizationString(), prettyJson, authorizationInfo.catalog, albumId);
+	}
+
+	/**
+	 * Asynchronously loads the artist's metadata ({@link ArtistData}) with the given <code>artistId</code> asynchronously.
 	 *
 	 * <p>
 	 * REST-method: <code>/artists/{artistId}</code>
@@ -279,6 +304,22 @@ public class RhapsodySdkWrapper {
 		LOGGER.info("Loading artist's {} info", artistId);
 		String authorization = getAuthorizationString();
 		artistService.getArtist(authorization, prettyJson, authorizationInfo.catalog, artistId, callback);
+	}
+
+	/**
+	 * Synchronously loads the artist's metadata ({@link ArtistData}) with the given <code>artistId</code> synchronously.
+	 * 
+	 * <p>
+	 * REST-method: <code>/artists/{artistId}</code>
+	 * </p>
+	 * 
+	 * @param artistId
+	 *            the ID of the artist to load
+	 * @return the artist's meta information
+	 */
+	public ArtistData getArtistMeta(String artistId) {
+		LOGGER.info("Loading artist's {} info", artistId);
+		return artistService.getArtist(getAuthorizationString(), prettyJson, authorizationInfo.catalog, artistId);
 	}
 
 	/**
@@ -472,5 +513,62 @@ public class RhapsodySdkWrapper {
 	public void loadAllAlbumsInLibrary(Integer limit, Callback<Collection<AlbumData>> callback) {
 		LOGGER.info("Loading all albums in library");
 		libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
+	}
+
+	/**
+	 * Loads the top played tracks.
+	 * 
+	 * <p>
+	 * REST-method: <code>/me/charts/tracks</code>
+	 * </p>
+	 * 
+	 * @param limit
+	 *            the number of tracks to load, if <code>null</code> the default value is used (20)
+	 * @param range
+	 *            the period to consider for the charts
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadTopPlayedTracks(Integer limit, RangeEnum range, Callback<List<ChartsTrack>> callback) {
+		LOGGER.info("Loading artist charts");
+		chartService.loadTopPlayedTracks(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+	}
+
+	/**
+	 * Loads the top played artists.
+	 * 
+	 * <p>
+	 * REST-method: <code>/me/charts/artists</code>
+	 * </p>
+	 * 
+	 * @param limit
+	 *            the number of artists to load, if <code>null</code> the default value is used (20)
+	 * @param range
+	 *            the period to consider for the charts
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadTopPlayedArtists(Integer limit, RangeEnum range, Callback<List<ChartsArtist>> callback) {
+		LOGGER.info("Loading artist charts");
+		chartService.loadTopPlayedArtists(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+	}
+
+	/**
+	 * Loads the top played albums.
+	 * 
+	 * <p>
+	 * REST-method: <code>/me/charts/albums</code>
+	 * </p>
+	 * 
+	 * @param limit
+	 *            the number of albums to load, if <code>null</code> the default value is used (20)
+	 * @param range
+	 *            the period to consider for the charts
+	 * @param callback
+	 *            callback which is called on success or failure
+	 */
+	public void loadTopPlayedAlbums(Integer limit, RangeEnum range, Callback<List<ChartsAlbum>> callback) {
+		LOGGER.info("Loading album charts");
+		chartService.loadTopPlayedAlbums(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
 	}
 }

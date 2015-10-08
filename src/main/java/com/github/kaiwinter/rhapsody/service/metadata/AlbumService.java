@@ -19,7 +19,7 @@ import retrofit.http.Query;
 public interface AlbumService {
 
 	/**
-	 * Returns detailed information about a given album, including its tracks.
+	 * Asynchronously returns detailed information about a given album, including its tracks.
 	 * 
 	 * @param authorization
 	 *            the access token
@@ -66,4 +66,23 @@ public interface AlbumService {
 			@Query("catalog") String catalog, //
 			@Query("guid") String userId, //
 			Callback<Collection<AlbumData>> callBack);
+
+	/**
+	 * Synchronously returns detailed information about a given album, including its tracks.
+	 * 
+	 * @param authorization
+	 *            the access token
+	 * @param pretty
+	 *            if <code>true</code> pretty prints the JSON
+	 * @param catalog
+	 *            countries' catalog (two-letter country code, which is case-sensitive)
+	 * @param albumId
+	 *            the ID of the album to load
+	 */
+	@GET("/v1/albums/{albumId}")
+	AlbumData getAlbum( //
+			@Header("Authorization") String authorization, //
+			@Query("pretty") boolean pretty, //
+			@Query("catalog") String catalog, //
+			@Path("albumId") String albumId);
 }

@@ -85,4 +85,23 @@ public interface ArtistService {
 			@Query("catalog") String catalog, //
 			@Path("artistId") String artistId, //
 			@Query("limit") Integer limit);
+
+	/**
+	 * Synchronously returns a given artist's name, ID and primary genre.
+	 * 
+	 * @param authorization
+	 *            the access token
+	 * @param pretty
+	 *            if <code>true</code> pretty prints the JSON
+	 * @param catalog
+	 *            countries' catalog (two-letter country code, which is case-sensitive)
+	 * @param artistId
+	 *            the ID of the artist to load
+	 */
+	@GET("/v1/artists/{artistId}")
+	ArtistData getArtist( //
+			@Header("Authorization") String authorization, //
+			@Query("pretty") boolean pretty, //
+			@Query("catalog") String catalog, //
+			@Path("artistId") String artistId);
 }

@@ -6,8 +6,12 @@ import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
 import retrofit.Callback;
+import retrofit.http.DELETE;
+import retrofit.http.Field;
+import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.Header;
+import retrofit.http.POST;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
@@ -78,4 +82,40 @@ public interface LibraryService {
 			@Query("pretty") boolean pretty, //
 			@Query("limit") Integer limit, //
 			Callback<Collection<AlbumData>> callBack);
+
+	/**
+	 * Adds an album to the user's library.
+	 * 
+	 * @param authorization
+	 *            the access token
+	 * @param catalog
+	 *            countries' catalog (two-letter country code, which is case-sensitive)
+	 * @param albumId
+	 *            the ID of the album to add
+	 * @param callBack
+	 *            doesn't return any data except the HTTP Response
+	 */
+	@POST("/v1/me/library/albums")
+	@FormUrlEncoded
+	void addAlbumToLibrary( //
+			@Header("Authorization") String authorization, //
+			@Field("catalog") String catalog, //
+			@Field("id") String albumId, //
+			Callback<Void> callBack);
+
+	/**
+	 * Deletes an album from the user's library.
+	 * 
+	 * @param authorization
+	 *            the access token
+	 * @param albumId
+	 *            the ID of the album to remove
+	 * @param callBack
+	 *            doesn't return any data except the HTTP Response
+	 */
+	@DELETE("/v1/me/library/albums/{albumId}")
+	void removeAlbumFromLibrary( //
+			@Header("Authorization") String authorization, //
+			@Path("albumId") String albumId, //
+			Callback<Void> callBack);
 }

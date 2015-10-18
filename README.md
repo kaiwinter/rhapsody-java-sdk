@@ -21,6 +21,8 @@ The following REST methods are currently available:
 * /v1/me/charts/tracks
 * /v1/me/charts/artists
 * /v1/me/charts/albums
+* /v1/me/library/albums (DELETE)
+* /v1/me/library/albums/{albumId} (POST)
 
 The REST service is triggered with the help of [retrofit](https://github.com/square/retrofit).
 Thanks to retrofit adding more REST methods to the wrapper can be done with very little effort.

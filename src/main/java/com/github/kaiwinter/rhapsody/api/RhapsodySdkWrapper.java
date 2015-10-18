@@ -571,4 +571,34 @@ public class RhapsodySdkWrapper {
 		LOGGER.info("Loading album charts");
 		chartService.loadTopPlayedAlbums(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
 	}
+
+	/**
+	 * Adds an album to the user's library.
+	 * 
+	 * @param albumId
+	 *            the ID of the album to add
+	 * @param callback
+	 *            doesn't return any data except the HTTP Response
+	 */
+	public void addAlbumToLibrary(String albumId, Callback<Void> callback) {
+		LOGGER.info("Adding album with ID '{}' to library", albumId);
+		libraryService.addAlbumToLibrary(getAuthorizationString(), authorizationInfo.catalog, albumId, callback);
+	}
+
+	/**
+	 * Deletes an album from the user's library.
+	 * 
+	 * <p>
+	 * REST-method: <code>/v1/me/library/albums/{albumId}</code>
+	 * </p>
+	 * 
+	 * @param albumId
+	 *            the ID of the album to remove
+	 * @param callback
+	 *            doesn't return any data except the HTTP Response
+	 */
+	public void removeAlbumFromLibrary(String albumId, Callback<Void> callback) {
+		LOGGER.info("Removing album with ID '{}' from library", albumId);
+		libraryService.removeAlbumFromLibrary(getAuthorizationString(), albumId, callback);
+	}
 }

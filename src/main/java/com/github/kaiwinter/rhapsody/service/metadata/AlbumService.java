@@ -7,7 +7,6 @@ import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import retrofit.Callback;
 import retrofit.http.GET;
-import retrofit.http.Header;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
@@ -21,8 +20,8 @@ public interface AlbumService {
 	/**
 	 * Asynchronously returns detailed information about a given album, including its tracks.
 	 * 
-	 * @param authorization
-	 *            the access token
+	 * @param apikey
+	 *            the API key
 	 * @param pretty
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
@@ -34,7 +33,7 @@ public interface AlbumService {
 	 */
 	@GET("/v1/albums/{albumId}")
 	void getAlbum( //
-			@Header("Authorization") String authorization, //
+			@Query("apikey") String apikey, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
 			@Path("albumId") String albumId, //
@@ -48,8 +47,8 @@ public interface AlbumService {
 	 * <i>Hint:</i> The <code>userId</code> is the {@link AccountData#id}.
 	 * </p>
 	 *
-	 * @param authorization
-	 *            the access token
+	 * @param apikey
+	 *            the API key
 	 * @param pretty
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
@@ -61,7 +60,7 @@ public interface AlbumService {
 	 */
 	@GET("/v1/albums/new")
 	void getNewReleases( //
-			@Header("Authorization") String authorization, //
+			@Query("apikey") String apikey, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
 			@Query("guid") String userId, //
@@ -70,8 +69,8 @@ public interface AlbumService {
 	/**
 	 * Synchronously returns detailed information about a given album, including its tracks.
 	 * 
-	 * @param authorization
-	 *            the access token
+	 * @param apikey
+	 *            the API key
 	 * @param pretty
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
@@ -81,7 +80,7 @@ public interface AlbumService {
 	 */
 	@GET("/v1/albums/{albumId}")
 	AlbumData getAlbum( //
-			@Header("Authorization") String authorization, //
+			@Query("apikey") String apikey, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
 			@Path("albumId") String albumId);

@@ -7,7 +7,6 @@ import com.github.kaiwinter.rhapsody.model.GenreData;
 
 import retrofit.Callback;
 import retrofit.http.GET;
-import retrofit.http.Header;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
@@ -21,8 +20,8 @@ public interface GenreService {
 	/**
 	 * Returns a hierarchical map of all genres and subgenres.
 	 * 
-	 * @param authorization
-	 *            the access token
+	 * @param apikey
+	 *            the API key
 	 * @param pretty
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
@@ -32,7 +31,7 @@ public interface GenreService {
 	 */
 	@GET("/v1/genres")
 	void getGenres( //
-			@Header("Authorization") String authorization, //
+			@Query("apikey") String apikey, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
 			Callback<Collection<GenreData>> callBack);
@@ -40,8 +39,8 @@ public interface GenreService {
 	/**
 	 * Returns a list of all new releases by genre.
 	 * 
-	 * @param authorization
-	 *            the access token
+	 * @param apikey
+	 *            the API key
 	 * @param pretty
 	 *            if <code>true</code> pretty prints the JSON
 	 * @param catalog
@@ -55,7 +54,7 @@ public interface GenreService {
 	 */
 	@GET("/v1/genres/{genreId}/albums/new")
 	void getNewReleases( //
-			@Header("Authorization") String authorization, //
+			@Query("apikey") String apikey, //
 			@Query("pretty") boolean pretty, //
 			@Query("catalog") String catalog, //
 			@Path("genreId") String genreId, //

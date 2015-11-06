@@ -267,8 +267,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public void loadAlbum(String albumId, Callback<AlbumData> callback) {
 		LOGGER.info("Loading album {}", albumId);
-		String authorization = getAuthorizationString();
-		albumService.getAlbum(authorization, prettyJson, authorizationInfo.catalog, albumId, callback);
+		albumService.getAlbum(apiKey, prettyJson, authorizationInfo.catalog, albumId, callback);
 	}
 
 	/**
@@ -285,7 +284,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public AlbumData getAlbum(String albumId) {
 		LOGGER.info("Loading album {}", albumId);
-		return albumService.getAlbum(getAuthorizationString(), prettyJson, authorizationInfo.catalog, albumId);
+		return albumService.getAlbum(apiKey, prettyJson, authorizationInfo.catalog, albumId);
 	}
 
 	/**
@@ -302,8 +301,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public void loadArtistMeta(String artistId, Callback<ArtistData> callback) {
 		LOGGER.info("Loading artist's {} info", artistId);
-		String authorization = getAuthorizationString();
-		artistService.getArtist(authorization, prettyJson, authorizationInfo.catalog, artistId, callback);
+		artistService.getArtist(apiKey, prettyJson, authorizationInfo.catalog, artistId, callback);
 	}
 
 	/**
@@ -319,7 +317,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public ArtistData getArtistMeta(String artistId) {
 		LOGGER.info("Loading artist's {} info", artistId);
-		return artistService.getArtist(getAuthorizationString(), prettyJson, authorizationInfo.catalog, artistId);
+		return artistService.getArtist(apiKey, prettyJson, authorizationInfo.catalog, artistId);
 	}
 
 	/**
@@ -336,8 +334,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public void loadArtistBio(String artistId, Callback<BioData> callback) {
 		LOGGER.info("Loading artist's {} bio", artistId);
-		String authorization = getAuthorizationString();
-		artistService.getBio(authorization, prettyJson, authorizationInfo.catalog, artistId, callback);
+		artistService.getBio(apiKey, prettyJson, authorizationInfo.catalog, artistId, callback);
 	}
 
 	/**
@@ -354,8 +351,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public void loadGenres(Callback<Collection<GenreData>> callback) {
 		LOGGER.info("Loading genres");
-		String authorization = getAuthorizationString();
-		genreService.getGenres(authorization, prettyJson, authorizationInfo.catalog, callback);
+		genreService.getGenres(apiKey, prettyJson, authorizationInfo.catalog, callback);
 	}
 
 	/**
@@ -377,9 +373,8 @@ public class RhapsodySdkWrapper {
 		Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
 		if (data == null) {
 			LOGGER.info("Loading curated album releases from server");
-			String authorization = getAuthorizationString();
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, callback);
-			albumService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, userId, callbackExt);
+			albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, userId, callbackExt);
 		} else {
 			LOGGER.info("Using curated album releases from cache");
 			callback.success(data, null);
@@ -404,9 +399,8 @@ public class RhapsodySdkWrapper {
 		Collection<AlbumData> data = dataCache.getNewReleases(genreId);
 		if (data == null) {
 			LOGGER.info("Loading genre new releases from server");
-			String authorization = getAuthorizationString();
 			Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
-			genreService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, genreId, limit, callbackExt);
+			genreService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, genreId, limit, callbackExt);
 		} else {
 			LOGGER.info("Using genre new releases from cache");
 			callback.success(data, null);
@@ -456,8 +450,7 @@ public class RhapsodySdkWrapper {
 	 */
 	public Collection<AlbumData> getArtistNewReleases(String artistId, Integer limit) {
 		LOGGER.info("Loading artist new releases");
-		String authorization = getAuthorizationString();
-		Collection<AlbumData> newReleases = artistService.getNewReleases(authorization, prettyJson, authorizationInfo.catalog, artistId, limit);
+		Collection<AlbumData> newReleases = artistService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, artistId, limit);
 
 		return newReleases;
 	}

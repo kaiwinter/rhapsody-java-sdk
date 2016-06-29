@@ -11,11 +11,12 @@ import retrofit.http.POST;
 
 /**
  * Wrapper for the Rhapsody Authentication REST API.
- *
+ * <p>
  * Access tokens expire regularly, so your application should take steps to refresh them as needed. (Note the expires_in
  * value above, which denotes that the associated token expires in 86399 seconds, or just under 24 hours.) To do so,
  * simply call the access_token service, passing your client secret.
- *
+ * </p>
+ * 
  * @see https://developer.rhapsody.com/api#authentication
  */
 public interface AuthenticationService {

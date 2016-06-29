@@ -284,8 +284,6 @@ public class RhapsodySdkWrapper {
     *
     * @param albumId
     *           the ID of the album to load
-    * @param callback
-    *           callback which is called on success or failure
     */
    public AlbumData getAlbum(String albumId) {
       LOGGER.info("Loading album {}", albumId);
@@ -350,8 +348,6 @@ public class RhapsodySdkWrapper {
     * REST-method: <code>/genres</code>
     * </p>
     *
-    * @param artistId
-    *           the ID of the artist to load
     * @param callback
     *           callback which is called on success or failure
     */

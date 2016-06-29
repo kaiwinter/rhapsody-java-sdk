@@ -12,9 +12,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 /**
- * Caches API responses.
- *
- * FIXME KW: implement eviction policy or use library
+ * Caches API responses. FIXME KW: implement eviction policy or use library
  */
 public final class DataCache {
 

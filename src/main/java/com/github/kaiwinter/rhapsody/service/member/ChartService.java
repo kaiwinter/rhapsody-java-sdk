@@ -18,83 +18,83 @@ import retrofit.http.Query;
  */
 public interface ChartService {
 
-	/**
-	 * The time range to load the charts for.
-	 */
-	public enum RangeEnum {
-		/** Last week. */
-		week,
-		/** Last month. */
-		month,
-		/** Last year. */
-		year,
-		/** Alltime. */
-		life;
-	}
+   /**
+    * The time range to load the charts for.
+    */
+   public enum RangeEnum {
+      /** Last week. */
+      week,
+      /** Last month. */
+      month,
+      /** Last year. */
+      year,
+      /** Alltime. */
+      life;
+   }
 
-	/**
-	 * Returns a list of most played tracks, ordered by play count, updated daily. Defaults to limit of 20.
-	 *
-	 * @param authorization
-	 *            the access token
-	 * @param pretty
-	 *            if <code>true</code> pretty prints the JSON
-	 * @param limit
-	 *            the number of releases which are loaded, if <code>null</code> the servers default value is used
-	 * @param range
-	 *            the period to consider for the charts
-	 * @param callBack
-	 *            callback to which the result is passed
-	 */
-	@GET("/v1/me/charts/tracks")
-	void loadTopPlayedTracks( //
-			@Header("Authorization") String authorization, //
-			@Query("pretty") boolean pretty, //
-			@Query("limit") Integer limit, //
-			@Query("range") RangeEnum range, //
-			Callback<List<ChartsTrack>> callBack);
+   /**
+    * Returns a list of most played tracks, ordered by play count, updated daily. Defaults to limit of 20.
+    *
+    * @param authorization
+    *           the access token
+    * @param pretty
+    *           if <code>true</code> pretty prints the JSON
+    * @param limit
+    *           the number of releases which are loaded, if <code>null</code> the servers default value is used
+    * @param range
+    *           the period to consider for the charts
+    * @param callBack
+    *           callback to which the result is passed
+    */
+   @GET("/v1/me/charts/tracks")
+   void loadTopPlayedTracks( //
+      @Header("Authorization") String authorization, //
+      @Query("pretty") boolean pretty, //
+      @Query("limit") Integer limit, //
+      @Query("range") RangeEnum range, //
+      Callback<List<ChartsTrack>> callBack);
 
-	/**
-	 * Returns a list of most played artists, ordered by play count, updated daily. Defaults to limit of 20.
-	 * 
-	 * @param authorization
-	 *            the access token
-	 * @param pretty
-	 *            if <code>true</code> pretty prints the JSON
-	 * @param limit
-	 *            the number of releases which are loaded, if <code>null</code> the servers default value is used
-	 * @param range
-	 *            the period to consider for the charts
-	 * @param callBack
-	 *            callback to which the result is passed
-	 */
-	@GET("/v1/me/charts/artists")
-	void loadTopPlayedArtists( //
-			@Header("Authorization") String authorization, //
-			@Query("pretty") boolean pretty, //
-			@Query("limit") Integer limit, //
-			@Query("range") RangeEnum range, //
-			Callback<List<ChartsArtist>> callBack);
+   /**
+    * Returns a list of most played artists, ordered by play count, updated daily. Defaults to limit of 20.
+    * 
+    * @param authorization
+    *           the access token
+    * @param pretty
+    *           if <code>true</code> pretty prints the JSON
+    * @param limit
+    *           the number of releases which are loaded, if <code>null</code> the servers default value is used
+    * @param range
+    *           the period to consider for the charts
+    * @param callBack
+    *           callback to which the result is passed
+    */
+   @GET("/v1/me/charts/artists")
+   void loadTopPlayedArtists( //
+      @Header("Authorization") String authorization, //
+      @Query("pretty") boolean pretty, //
+      @Query("limit") Integer limit, //
+      @Query("range") RangeEnum range, //
+      Callback<List<ChartsArtist>> callBack);
 
-	/**
-	 * Returns a list of most played albums, ordered by play count, updated daily. Defaults to limit of 20.
-	 * 
-	 * @param authorization
-	 *            the access token
-	 * @param pretty
-	 *            if <code>true</code> pretty prints the JSON
-	 * @param limit
-	 *            the number of releases which are loaded, if <code>null</code> the servers default value is used
-	 * @param range
-	 *            the period to consider for the charts
-	 * @param callBack
-	 *            callback to which the result is passed
-	 */
-	@GET("/v1/me/charts/albums")
-	void loadTopPlayedAlbums( //
-			@Header("Authorization") String authorization, //
-			@Query("pretty") boolean pretty, //
-			@Query("limit") Integer limit, //
-			@Query("range") RangeEnum range, //
-			Callback<List<ChartsAlbum>> callBack);
+   /**
+    * Returns a list of most played albums, ordered by play count, updated daily. Defaults to limit of 20.
+    * 
+    * @param authorization
+    *           the access token
+    * @param pretty
+    *           if <code>true</code> pretty prints the JSON
+    * @param limit
+    *           the number of releases which are loaded, if <code>null</code> the servers default value is used
+    * @param range
+    *           the period to consider for the charts
+    * @param callBack
+    *           callback to which the result is passed
+    */
+   @GET("/v1/me/charts/albums")
+   void loadTopPlayedAlbums( //
+      @Header("Authorization") String authorization, //
+      @Query("pretty") boolean pretty, //
+      @Query("limit") Integer limit, //
+      @Query("range") RangeEnum range, //
+      Callback<List<ChartsAlbum>> callBack);
 }

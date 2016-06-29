@@ -14,19 +14,19 @@ import retrofit.http.Query;
  */
 public interface AccountService {
 
-	/**
-	 * Returns the member account. Accounts will be returned only for valid members.
-	 * 
-	 * @param authorization
-	 *            the access token
-	 * @param pretty
-	 *            if <code>true</code> pretty prints the JSON
-	 * @param callBack
-	 *            callback to which the result is passed
-	 */
-	@GET("/v1/me/account")
-	void getAccount( //
-			@Header("Authorization") String authorization, //
-			@Query("pretty") boolean pretty, //
-			Callback<AccountData> callBack);
+   /**
+    * Returns the member account. Accounts will be returned only for valid members.
+    * 
+    * @param authorization
+    *           the access token
+    * @param pretty
+    *           if <code>true</code> pretty prints the JSON
+    * @param callBack
+    *           callback to which the result is passed
+    */
+   @GET("/v1/me/account")
+   void getAccount( //
+      @Header("Authorization") String authorization, //
+      @Query("pretty") boolean pretty, //
+      Callback<AccountData> callBack);
 }

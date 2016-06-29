@@ -6,20 +6,20 @@ package com.github.kaiwinter.rhapsody.api;
  */
 public interface AuthenticationCallback {
 
-	/**
-	 * Is called if the authentication request or the token refresh request succeeds.
-	 */
-	default void success() {
-	}
+   /**
+    * Is called if the authentication request or the token refresh request succeeds.
+    */
+   default void success() {
+   }
 
-	/**
-	 * Is called if the authentication request or the token refresh request fails.
-	 *
-	 * @param status
-	 *            the HTTP status code
-	 * @param reason
-	 *            the status message
-	 */
-	default void failure(int status, String reason) {
-	}
+   /**
+    * Is called if the authentication request or the token refresh request fails.
+    *
+    * @param status
+    *           the HTTP status code
+    * @param reason
+    *           the status message
+    */
+   default void failure(int status, String reason) {
+   }
 }

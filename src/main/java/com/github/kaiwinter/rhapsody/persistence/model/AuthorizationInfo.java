@@ -5,7 +5,7 @@ package com.github.kaiwinter.rhapsody.persistence.model;
  */
 public final class AuthorizationInfo {
 
-	public String accessToken;
-	public String refreshToken;
-	public String catalog;
+   public String accessToken;
+   public String refreshToken;
+   public String catalog;
 }

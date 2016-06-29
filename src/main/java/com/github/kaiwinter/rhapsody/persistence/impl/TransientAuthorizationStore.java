@@ -8,17 +8,17 @@ import com.github.kaiwinter.rhapsody.persistence.model.AuthorizationInfo;
  */
 public final class TransientAuthorizationStore implements AuthorizationStore {
 
-	@Override
-	public AuthorizationInfo loadAuthorizationInfo() {
-		AuthorizationInfo authorizationInfo = new AuthorizationInfo();
-		return authorizationInfo;
-	}
+   @Override
+   public AuthorizationInfo loadAuthorizationInfo() {
+      AuthorizationInfo authorizationInfo = new AuthorizationInfo();
+      return authorizationInfo;
+   }
 
-	@Override
-	public void saveAuthorizationInfo(AuthorizationInfo authorizationInfo) {
-	}
+   @Override
+   public void saveAuthorizationInfo(AuthorizationInfo authorizationInfo) {
+   }
 
-	@Override
-	public void clearAuthorization() {
-	}
+   @Override
+   public void clearAuthorization() {
+   }
 }

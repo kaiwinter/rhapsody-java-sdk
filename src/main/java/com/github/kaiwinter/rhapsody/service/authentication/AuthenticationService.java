@@ -4,10 +4,10 @@ import com.github.kaiwinter.rhapsody.model.AccessToken;
 import com.github.kaiwinter.rhapsody.model.PasswordGrant;
 import com.github.kaiwinter.rhapsody.model.RefreshToken;
 
-import retrofit.Callback;
-import retrofit.http.Body;
-import retrofit.http.Header;
-import retrofit.http.POST;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
 
 /**
  * Wrapper for the Rhapsody Authentication REST API.
@@ -28,25 +28,21 @@ public interface AuthenticationService {
     *           HTTP basic authentication
     * @param passwordGrant
     *           the username/password information
-    * @param callBack
-    *           the callback which is called after the REST call returns
+    * @return asynchronous result
     */
    @POST("/oauth/token")
-   void authorizeByPassword( //
+   Call<AccessToken> authorizeByPasswordAsync( //
       @Header("Authorization") String basicAuthentication, //
-      @Body PasswordGrant passwordGrant, //
-      Callback<AccessToken> callBack);
+      @Body PasswordGrant passwordGrant);
 
    /**
     * Refreshes the access token by sending the refresh token to the server.
     *
     * @param refreshToken
     *           the refresh token
-    * @param callBack
-    *           the callback which is called after the REST call finished
+    * @return asynchronous result
     */
    @POST("/oauth/access_token")
-   void refreshAuthorization( //
-      @Body RefreshToken refreshToken, //
-      Callback<AccessToken> callBack);
+   Call<AccessToken> refreshAuthorizationAsync( //
+      @Body RefreshToken refreshToken);
 }

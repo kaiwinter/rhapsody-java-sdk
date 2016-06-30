@@ -2,10 +2,10 @@ package com.github.kaiwinter.rhapsody.service.member;
 
 import com.github.kaiwinter.rhapsody.model.AccountData;
 
-import retrofit.Callback;
-import retrofit.http.GET;
-import retrofit.http.Header;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.Query;
 
 /**
  * Wrapper of the Member REST API.
@@ -21,12 +21,10 @@ public interface AccountService {
     *           the access token
     * @param pretty
     *           if <code>true</code> pretty prints the JSON
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/account")
-   void getAccount( //
+   Call<AccountData> getAccountAsync( //
       @Header("Authorization") String authorization, //
-      @Query("pretty") boolean pretty, //
-      Callback<AccountData> callBack);
+      @Query("pretty") boolean pretty);
 }

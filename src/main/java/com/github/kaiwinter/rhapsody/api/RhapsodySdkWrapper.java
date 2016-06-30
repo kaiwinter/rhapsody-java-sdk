@@ -1,7 +1,9 @@
 package com.github.kaiwinter.rhapsody.api;
 
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,11 +35,14 @@ import com.github.kaiwinter.rhapsody.service.metadata.AlbumService;
 import com.github.kaiwinter.rhapsody.service.metadata.ArtistService;
 import com.github.kaiwinter.rhapsody.service.metadata.GenreService;
 
-import retrofit.Callback;
-import retrofit.RestAdapter;
-import retrofit.RestAdapter.LogLevel;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Wrapper for the Rhapsody REST API. It can be used with a Rhapsody account as well as with a Napster account. This
@@ -65,14 +70,14 @@ public class RhapsodySdkWrapper {
    /** The Rhapsody app API secret. */
    private final String apiSecret;
 
-   private final RestAdapter restAdapter;
-   private final AuthenticationService authService;
-   private final GenreService genreService;
-   private final ArtistService artistService;
-   private final AlbumService albumService;
-   private final AccountService memberService;
-   private final LibraryService libraryService;
-   private final ChartService chartService;
+   private Retrofit restAdapter;
+   private AuthenticationService authService;
+   private GenreService genreService;
+   private ArtistService artistService;
+   private AlbumService albumService;
+   private AccountService memberService;
+   private LibraryService libraryService;
+   private ChartService chartService;
 
    private final DataCache dataCache;
 
@@ -129,14 +134,7 @@ public class RhapsodySdkWrapper {
          this.authorizationStore = authorizationStore;
       }
 
-      restAdapter = new RestAdapter.Builder().setEndpoint(API_URL).build();
-      authService = restAdapter.create(AuthenticationService.class);
-      genreService = restAdapter.create(GenreService.class);
-      artistService = restAdapter.create(ArtistService.class);
-      albumService = restAdapter.create(AlbumService.class);
-      memberService = restAdapter.create(AccountService.class);
-      libraryService = restAdapter.create(LibraryService.class);
-      chartService = restAdapter.create(ChartService.class);
+      initServices(HttpLoggingInterceptor.Level.NONE);
 
       dataCache = new DataCache();
 
@@ -151,11 +149,28 @@ public class RhapsodySdkWrapper {
     */
    public void setVerboseLoggingEnabled(boolean enabled) {
       if (enabled) {
-         restAdapter.setLogLevel(LogLevel.FULL);
+         initServices(HttpLoggingInterceptor.Level.BODY);
+
          prettyJson = true;
       } else {
          prettyJson = false;
       }
+   }
+
+   private void initServices(Level level) {
+      HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+      interceptor.setLevel(level);
+      OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+      restAdapter = new Retrofit.Builder().baseUrl(API_URL).client(client)
+         .addConverterFactory(GsonConverterFactory.create()).build();
+
+      authService = restAdapter.create(AuthenticationService.class);
+      genreService = restAdapter.create(GenreService.class);
+      artistService = restAdapter.create(ArtistService.class);
+      albumService = restAdapter.create(AlbumService.class);
+      memberService = restAdapter.create(AccountService.class);
+      libraryService = restAdapter.create(LibraryService.class);
+      chartService = restAdapter.create(ChartService.class);
    }
 
    /**
@@ -183,34 +198,50 @@ public class RhapsodySdkWrapper {
    public void authorize(String username, String password, AuthenticationCallback loginCallback) {
       LOGGER.info("Authorizing");
       String basicAuth = new String(Base64.getEncoder().encode((String.format("%s:%s", apiKey, apiSecret).getBytes())));
-      authService.authorizeByPassword(basicAuth, new PasswordGrant(username, password), new Callback<AccessToken>() {
+      Call<AccessToken> call = authService.authorizeByPasswordAsync(basicAuth, new PasswordGrant(username, password));
+      call.enqueue(new Callback<AccessToken>() {
 
          @Override
-         public void success(AccessToken authorizationResponse, Response response) {
-            LOGGER.info("Successfully authorized, access token: {}", authorizationResponse.access_token);
-            authorizationInfo = new AuthorizationInfo();
-            authorizationInfo.accessToken = authorizationResponse.access_token;
-            authorizationInfo.refreshToken = authorizationResponse.refresh_token;
-            authorizationInfo.catalog = authorizationResponse.catalog;
-            authorizationStore.saveAuthorizationInfo(authorizationInfo);
+         public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Successfully authorized, access token: {}", response.body().access_token);
+               authorizationInfo = new AuthorizationInfo();
+               authorizationInfo.accessToken = response.body().access_token;
+               authorizationInfo.refreshToken = response.body().refresh_token;
+               authorizationInfo.catalog = response.body().catalog;
+               authorizationStore.saveAuthorizationInfo(authorizationInfo);
 
-            if (loginCallback != null) {
-               loginCallback.success();
+               if (loginCallback != null) {
+                  loginCallback.success();
+               }
+            } else {
+               handleError(loginCallback, response);
             }
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            int status = error.getResponse().getStatus();
-            String reason = error.getResponse().getReason();
-            LOGGER.error("Error authorizing ()", status, error);
-
-            if (loginCallback != null) {
-               loginCallback.failure(status, reason);
-            }
+         public void onFailure(Call<AccessToken> call, Throwable throwable) {
+            handleError(loginCallback, throwable);
          }
       });
+   }
 
+   private void handleError(AuthenticationCallback loginCallback, Response<AccessToken> response) {
+      int status = response.code();
+      String reason = response.message();
+      LOGGER.error("Error authorizing ({} {})", status, reason);
+
+      if (loginCallback != null) {
+         loginCallback.failure(status, reason);
+      }
+   }
+
+   private void handleError(AuthenticationCallback loginCallback, Throwable throwable) {
+      LOGGER.error("Error authorizing ({})", throwable.getMessage());
+
+      if (loginCallback != null) {
+         loginCallback.failure(0, throwable.getMessage());
+      }
    }
 
    /**
@@ -231,24 +262,28 @@ public class RhapsodySdkWrapper {
       refreshToken.client_secret = apiSecret;
       refreshToken.refresh_token = authorizationInfo.refreshToken;
 
-      authService.refreshAuthorization(refreshToken, new Callback<AccessToken>() {
+      Call<AccessToken> call = authService.refreshAuthorizationAsync(refreshToken);
+      call.enqueue(new Callback<AccessToken>() {
 
          @Override
-         public void success(AccessToken authorizationResponse, Response response) {
-            LOGGER.info("Successfully refreshed token, access token: {}", authorizationResponse.access_token);
-            authorizationInfo.accessToken = authorizationResponse.access_token;
-            authorizationInfo.refreshToken = authorizationResponse.refresh_token;
-            authorizationStore.saveAuthorizationInfo(authorizationInfo);
+         public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Successfully refreshed token, access token: {}", response.body().access_token);
+               authorizationInfo.accessToken = response.body().access_token;
+               authorizationInfo.refreshToken = response.body().refresh_token;
+               authorizationStore.saveAuthorizationInfo(authorizationInfo);
 
-            callback.success();
+               callback.success();
+            } else {
+               LOGGER.error("Error refreshing token ({} {})", response.code(), response.message());
+
+               callback.failure(response.code(), response.message());
+            }
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error("Error refreshing token ({} {})", error.getResponse().getStatus(),
-               error.getResponse().getReason());
-
-            callback.failure(error.getResponse().getStatus(), error.getResponse().getReason());
+         public void onFailure(Call<AccessToken> call, Throwable throwable) {
+            handleError(callback, throwable);
          }
       });
    }
@@ -272,7 +307,8 @@ public class RhapsodySdkWrapper {
     */
    public void loadAlbum(String albumId, Callback<AlbumData> callback) {
       LOGGER.info("Loading album {}", albumId);
-      albumService.getAlbum(apiKey, prettyJson, authorizationInfo.catalog, albumId, callback);
+      Call<AlbumData> call = albumService.getAlbum(albumId, apiKey, prettyJson, authorizationInfo.catalog);
+      call.enqueue(callback);
    }
 
    /**
@@ -287,7 +323,13 @@ public class RhapsodySdkWrapper {
     */
    public AlbumData getAlbum(String albumId) {
       LOGGER.info("Loading album {}", albumId);
-      return albumService.getAlbum(apiKey, prettyJson, authorizationInfo.catalog, albumId);
+      Call<AlbumData> call = albumService.getAlbum(albumId, apiKey, prettyJson, authorizationInfo.catalog);
+      try {
+         return call.execute().body();
+      } catch (IOException e) {
+         LOGGER.info("Error loading albums", e);
+         return null;
+      }
    }
 
    /**
@@ -305,7 +347,8 @@ public class RhapsodySdkWrapper {
     */
    public void loadArtistMeta(String artistId, Callback<ArtistData> callback) {
       LOGGER.info("Loading artist's {} info", artistId);
-      artistService.getArtist(apiKey, prettyJson, authorizationInfo.catalog, artistId, callback);
+      Call<ArtistData> call = artistService.getArtist(artistId, apiKey, prettyJson, authorizationInfo.catalog);
+      call.enqueue(callback);
    }
 
    /**
@@ -317,11 +360,17 @@ public class RhapsodySdkWrapper {
     * 
     * @param artistId
     *           the ID of the artist to load
-    * @return the artist's meta information
+    * @return the artist's meta information, or <code>null</code>
     */
    public ArtistData getArtistMeta(String artistId) {
       LOGGER.info("Loading artist's {} info", artistId);
-      return artistService.getArtist(apiKey, prettyJson, authorizationInfo.catalog, artistId);
+      Call<ArtistData> call = artistService.getArtist(artistId, apiKey, prettyJson, authorizationInfo.catalog);
+      try {
+         return call.execute().body();
+      } catch (IOException e) {
+         LOGGER.info("Error loading artist's info", e);
+         return null;
+      }
    }
 
    /**
@@ -338,7 +387,8 @@ public class RhapsodySdkWrapper {
     */
    public void loadArtistBio(String artistId, Callback<BioData> callback) {
       LOGGER.info("Loading artist's {} bio", artistId);
-      artistService.getBio(apiKey, prettyJson, authorizationInfo.catalog, artistId, callback);
+      Call<BioData> call = artistService.getBio(artistId, apiKey, prettyJson, authorizationInfo.catalog);
+      call.enqueue(callback);
    }
 
    /**
@@ -353,7 +403,8 @@ public class RhapsodySdkWrapper {
     */
    public void loadGenres(Callback<Collection<GenreData>> callback) {
       LOGGER.info("Loading genres");
-      genreService.getGenres(apiKey, prettyJson, authorizationInfo.catalog, callback);
+      Call<Collection<GenreData>> call = genreService.getGenresAsync(apiKey, prettyJson, authorizationInfo.catalog);
+      call.enqueue(callback);
    }
 
    /**
@@ -376,10 +427,12 @@ public class RhapsodySdkWrapper {
       if (data == null) {
          LOGGER.info("Loading curated album releases from server");
          Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, callback);
-         albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, userId, callbackExt);
+         Call<Collection<AlbumData>> call = albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog,
+            userId);
+         call.enqueue(callbackExt);
       } else {
          LOGGER.info("Using curated album releases from cache");
-         callback.success(data, null);
+         callback.onResponse(null, Response.success(data));
       }
    }
 
@@ -402,10 +455,12 @@ public class RhapsodySdkWrapper {
       if (data == null) {
          LOGGER.info("Loading genre new releases from server");
          Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
-         genreService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, genreId, limit, callbackExt);
+         Call<Collection<AlbumData>> call = genreService.getNewReleasesAsync(genreId, apiKey, prettyJson,
+            authorizationInfo.catalog, limit);
+         call.enqueue(callbackExt);
       } else {
          LOGGER.info("Using genre new releases from cache");
-         callback.success(data, null);
+         callback.onResponse(null, Response.success(data));
       }
    }
 
@@ -438,7 +493,8 @@ public class RhapsodySdkWrapper {
    public void loadAccount(Callback<AccountData> callback) {
       LOGGER.info("Loading account information");
       String authorization = getAuthorizationString();
-      memberService.getAccount(authorization, prettyJson, callback);
+      Call<AccountData> call = memberService.getAccountAsync(authorization, prettyJson);
+      call.enqueue(callback);
    }
 
    /**
@@ -452,10 +508,15 @@ public class RhapsodySdkWrapper {
     */
    public Collection<AlbumData> getArtistNewReleases(String artistId, Integer limit) {
       LOGGER.info("Loading artist new releases");
-      Collection<AlbumData> newReleases = artistService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog,
-         artistId, limit);
+      Call<Collection<AlbumData>> newReleases = artistService.getNewReleases(artistId, apiKey, prettyJson,
+         authorizationInfo.catalog, limit);
 
-      return newReleases;
+      try {
+         return newReleases.execute().body();
+      } catch (IOException e) {
+         LOGGER.info("Error loading artist new releases", e);
+         return Collections.emptyList();
+      }
    }
 
    /**
@@ -472,7 +533,9 @@ public class RhapsodySdkWrapper {
     */
    public void loadAllArtistsInLibrary(Integer limit, Callback<Collection<Artist>> callback) {
       LOGGER.info("Loading all artists in library");
-      libraryService.loadAllArtistsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
+      Call<Collection<Artist>> call = libraryService.loadAllArtistsInLibrary(getAuthorizationString(), prettyJson,
+         limit);
+      call.enqueue(callback);
    }
 
    /**
@@ -492,7 +555,9 @@ public class RhapsodySdkWrapper {
    public void loadAllAlbumsByArtistInLibrary(String artistId, Integer limit,
       Callback<Collection<AlbumData>> callback) {
       LOGGER.info("Loading all albums by artists in library");
-      libraryService.loadAllAlbumsByArtistInLibrary(getAuthorizationString(), prettyJson, artistId, limit, callback);
+      Call<Collection<AlbumData>> call = libraryService.loadAllAlbumsByArtistInLibrary(getAuthorizationString(),
+         artistId, prettyJson, limit);
+      call.enqueue(callback);
    }
 
    /**
@@ -509,7 +574,9 @@ public class RhapsodySdkWrapper {
     */
    public void loadAllAlbumsInLibrary(Integer limit, Callback<Collection<AlbumData>> callback) {
       LOGGER.info("Loading all albums in library");
-      libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
+      Call<Collection<AlbumData>> call = libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson,
+         limit);
+      call.enqueue(callback);
    }
 
    /**
@@ -528,7 +595,9 @@ public class RhapsodySdkWrapper {
     */
    public void loadTopPlayedTracks(Integer limit, RangeEnum range, Callback<List<ChartsTrack>> callback) {
       LOGGER.info("Loading artist charts");
-      chartService.loadTopPlayedTracks(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+      Call<List<ChartsTrack>> call = chartService.loadTopPlayedTracksAsync(getAuthorizationString(), prettyJson, limit,
+         RangeEnum.life);
+      call.enqueue(callback);
    }
 
    /**
@@ -547,7 +616,9 @@ public class RhapsodySdkWrapper {
     */
    public void loadTopPlayedArtists(Integer limit, RangeEnum range, Callback<List<ChartsArtist>> callback) {
       LOGGER.info("Loading artist charts");
-      chartService.loadTopPlayedArtists(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+      Call<List<ChartsArtist>> call = chartService.loadTopPlayedArtistsAsync(getAuthorizationString(), prettyJson,
+         limit, RangeEnum.life);
+      call.enqueue(callback);
    }
 
    /**
@@ -566,7 +637,9 @@ public class RhapsodySdkWrapper {
     */
    public void loadTopPlayedAlbums(Integer limit, RangeEnum range, Callback<List<ChartsAlbum>> callback) {
       LOGGER.info("Loading album charts");
-      chartService.loadTopPlayedAlbums(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+      Call<List<ChartsAlbum>> call = chartService.loadTopPlayedAlbumsAsync(getAuthorizationString(), prettyJson, limit,
+         RangeEnum.life);
+      call.enqueue(callback);
    }
 
    /**
@@ -579,7 +652,8 @@ public class RhapsodySdkWrapper {
     */
    public void addAlbumToLibrary(String albumId, Callback<Void> callback) {
       LOGGER.info("Adding album with ID '{}' to library", albumId);
-      libraryService.addAlbumToLibrary(getAuthorizationString(), authorizationInfo.catalog, albumId, callback);
+      Call<Void> call = libraryService.addAlbumToLibrary(getAuthorizationString(), authorizationInfo.catalog, albumId);
+      call.enqueue(callback);
    }
 
    /**
@@ -596,6 +670,7 @@ public class RhapsodySdkWrapper {
     */
    public void removeAlbumFromLibrary(String albumId, Callback<Void> callback) {
       LOGGER.info("Removing album with ID '{}' from library", albumId);
-      libraryService.removeAlbumFromLibrary(getAuthorizationString(), albumId, callback);
+      Call<Void> call = libraryService.removeAlbumFromLibrary(getAuthorizationString(), albumId);
+      call.enqueue(callback);
    }
 }

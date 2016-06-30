@@ -5,15 +5,15 @@ import java.util.Collection;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
-import retrofit.Callback;
-import retrofit.http.DELETE;
-import retrofit.http.Field;
-import retrofit.http.FormUrlEncoded;
-import retrofit.http.GET;
-import retrofit.http.Header;
-import retrofit.http.POST;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Wrapper of the Album REST API.
@@ -32,15 +32,13 @@ public interface LibraryService {
     *           if <code>true</code> pretty prints the JSON
     * @param limit
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/library/artists")
-   void loadAllArtistsInLibrary( //
+   Call<Collection<Artist>> loadAllArtistsInLibrary( //
       @Header("Authorization") String authorization, //
       @Query("pretty") boolean pretty, //
-      @Query("limit") Integer limit, //
-      Callback<Collection<Artist>> callBack);
+      @Query("limit") Integer limit);
 
    /**
     * Returns a list of albums in a member’s library by the artist. Accepts optional parameters limit and offset to
@@ -48,22 +46,20 @@ public interface LibraryService {
     *
     * @param authorization
     *           the access token
-    * @param pretty
-    *           if <code>true</code> pretty prints the JSON
     * @param artistId
     *           the ID of the artist to load
+    * @param pretty
+    *           if <code>true</code> pretty prints the JSON
     * @param limit
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/library/artists/{artistId}/albums")
-   void loadAllAlbumsByArtistInLibrary( //
+   Call<Collection<AlbumData>> loadAllAlbumsByArtistInLibrary( //
       @Header("Authorization") String authorization, //
-      @Query("pretty") boolean pretty, //
       @Path("artistId") String artistId, //
-      @Query("limit") Integer limit, //
-      Callback<Collection<AlbumData>> callBack);
+      @Query("pretty") boolean pretty, //
+      @Query("limit") Integer limit);
 
    /**
     * Returns a list of albums in a member’s library. Accepts optional parameters limit and offset to select a range of
@@ -75,15 +71,13 @@ public interface LibraryService {
     *           if <code>true</code> pretty prints the JSON
     * @param limit
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/library/albums")
-   void loadAllAlbumsInLibrary( //
+   Call<Collection<AlbumData>> loadAllAlbumsInLibrary( //
       @Header("Authorization") String authorization, //
       @Query("pretty") boolean pretty, //
-      @Query("limit") Integer limit, //
-      Callback<Collection<AlbumData>> callBack);
+      @Query("limit") Integer limit);
 
    /**
     * Adds an album to the user's library.
@@ -94,16 +88,14 @@ public interface LibraryService {
     *           countries' catalog (two-letter country code, which is case-sensitive)
     * @param albumId
     *           the ID of the album to add
-    * @param callBack
-    *           doesn't return any data except the HTTP Response
+    * @return asynchronous result, doesn't return any data except the HTTP Response
     */
    @POST("/v1/me/library/albums")
    @FormUrlEncoded
-   void addAlbumToLibrary( //
+   Call<Void> addAlbumToLibrary( //
       @Header("Authorization") String authorization, //
       @Field("catalog") String catalog, //
-      @Field("id") String albumId, //
-      Callback<Void> callBack);
+      @Field("id") String albumId);
 
    /**
     * Deletes an album from the user's library.
@@ -112,12 +104,10 @@ public interface LibraryService {
     *           the access token
     * @param albumId
     *           the ID of the album to remove
-    * @param callBack
-    *           doesn't return any data except the HTTP Response
+    * @return asynchronous result, doesn't return any data except the HTTP Response
     */
    @DELETE("/v1/me/library/albums/{albumId}")
-   void removeAlbumFromLibrary( //
+   Call<Void> removeAlbumFromLibrary( //
       @Header("Authorization") String authorization, //
-      @Path("albumId") String albumId, //
-      Callback<Void> callBack);
+      @Path("albumId") String albumId);
 }

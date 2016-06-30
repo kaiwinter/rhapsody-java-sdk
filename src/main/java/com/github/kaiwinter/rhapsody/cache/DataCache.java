@@ -7,9 +7,9 @@ import java.util.Map;
 
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Caches API responses. FIXME KW: implement eviction policy or use library
@@ -44,7 +44,7 @@ public final class DataCache {
       return new CallbackExtension<Collection<AlbumData>>(callback) {
 
          @Override
-         public void successExt(Collection<AlbumData> albums, Response response) {
+         public void successExt(Collection<AlbumData> albums, Response<Collection<AlbumData>> response) {
             genre2NewReleases.put(cacheId, albums);
          }
       };
@@ -73,7 +73,7 @@ public final class DataCache {
        * @param response
        *           the retrofit {@link Response}
        */
-      abstract void successExt(T resultObject, Response response);
+      abstract void successExt(T resultObject, Response<T> response);
 
       /**
        * Constructs a new {@link CallbackExtension} with the wrapped original {@link Callback}.
@@ -86,14 +86,18 @@ public final class DataCache {
       }
 
       @Override
-      public void success(T resultObject, Response response) {
-         successExt(resultObject, response);
-         callback.success(resultObject, response);
+      public void onResponse(Call<T> call, Response<T> response) {
+         if (response.isSuccessful()) {
+            successExt(response.body(), response);
+            callback.onResponse(call, response);
+         } else {
+            callback.onFailure(call, new Throwable(response.message()));
+         }
       }
 
       @Override
-      public void failure(RetrofitError error) {
-         callback.failure(error);
+      public void onFailure(Call<T> call, Throwable throwable) {
+         callback.onFailure(call, throwable);
       }
    }
 

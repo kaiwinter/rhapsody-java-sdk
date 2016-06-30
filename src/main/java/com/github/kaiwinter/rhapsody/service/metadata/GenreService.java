@@ -5,10 +5,10 @@ import java.util.Collection;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 
-import retrofit.Callback;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Wrapper of the Genre REST API.
@@ -26,38 +26,34 @@ public interface GenreService {
     *           if <code>true</code> pretty prints the JSON
     * @param catalog
     *           countries' catalog (two-letter country code, which is case-sensitive)
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/genres")
-   void getGenres( //
+   Call<Collection<GenreData>> getGenresAsync( //
       @Query("apikey") String apikey, //
       @Query("pretty") boolean pretty, //
-      @Query("catalog") String catalog, //
-      Callback<Collection<GenreData>> callBack);
+      @Query("catalog") String catalog);
 
    /**
     * Returns a list of all new releases by genre.
     * 
+    * @param genreId
+    *           the ID of the genre to load new releases
     * @param apikey
     *           the API key
     * @param pretty
     *           if <code>true</code> pretty prints the JSON
     * @param catalog
     *           countries' catalog (two-letter country code, which is case-sensitive)
-    * @param genreId
-    *           the ID of the genre to load new releases
     * @param limit
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/genres/{genreId}/albums/new")
-   void getNewReleases( //
+   Call<Collection<AlbumData>> getNewReleasesAsync( //
+      @Path("genreId") String genreId, //
       @Query("apikey") String apikey, //
       @Query("pretty") boolean pretty, //
       @Query("catalog") String catalog, //
-      @Path("genreId") String genreId, //
-      @Query("limit") Integer limit, //
-      Callback<Collection<AlbumData>> callBack);
+      @Query("limit") Integer limit);
 }

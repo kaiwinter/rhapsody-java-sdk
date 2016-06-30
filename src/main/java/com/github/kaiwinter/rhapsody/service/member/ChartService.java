@@ -6,10 +6,10 @@ import com.github.kaiwinter.rhapsody.model.member.ChartsAlbum;
 import com.github.kaiwinter.rhapsody.model.member.ChartsArtist;
 import com.github.kaiwinter.rhapsody.model.member.ChartsTrack;
 
-import retrofit.Callback;
-import retrofit.http.GET;
-import retrofit.http.Header;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.Query;
 
 /**
  * Wrapper of the Charts REST API.
@@ -43,16 +43,14 @@ public interface ChartService {
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
     * @param range
     *           the period to consider for the charts
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/charts/tracks")
-   void loadTopPlayedTracks( //
+   Call<List<ChartsTrack>> loadTopPlayedTracksAsync( //
       @Header("Authorization") String authorization, //
       @Query("pretty") boolean pretty, //
       @Query("limit") Integer limit, //
-      @Query("range") RangeEnum range, //
-      Callback<List<ChartsTrack>> callBack);
+      @Query("range") RangeEnum range);
 
    /**
     * Returns a list of most played artists, ordered by play count, updated daily. Defaults to limit of 20.
@@ -65,16 +63,14 @@ public interface ChartService {
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
     * @param range
     *           the period to consider for the charts
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/charts/artists")
-   void loadTopPlayedArtists( //
+   Call<List<ChartsArtist>> loadTopPlayedArtistsAsync( //
       @Header("Authorization") String authorization, //
       @Query("pretty") boolean pretty, //
       @Query("limit") Integer limit, //
-      @Query("range") RangeEnum range, //
-      Callback<List<ChartsArtist>> callBack);
+      @Query("range") RangeEnum range);
 
    /**
     * Returns a list of most played albums, ordered by play count, updated daily. Defaults to limit of 20.
@@ -87,14 +83,12 @@ public interface ChartService {
     *           the number of releases which are loaded, if <code>null</code> the servers default value is used
     * @param range
     *           the period to consider for the charts
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/me/charts/albums")
-   void loadTopPlayedAlbums( //
+   Call<List<ChartsAlbum>> loadTopPlayedAlbumsAsync( //
       @Header("Authorization") String authorization, //
       @Query("pretty") boolean pretty, //
       @Query("limit") Integer limit, //
-      @Query("range") RangeEnum range, //
-      Callback<List<ChartsAlbum>> callBack);
+      @Query("range") RangeEnum range);
 }

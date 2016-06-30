@@ -5,10 +5,10 @@ import java.util.Collection;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
-import retrofit.Callback;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Wrapper of the Album REST API.
@@ -20,24 +20,22 @@ public interface AlbumService {
    /**
     * Asynchronously returns detailed information about a given album, including its tracks.
     * 
+    * @param albumId
+    *           the ID of the album to load
     * @param apikey
     *           the API key
     * @param pretty
     *           if <code>true</code> pretty prints the JSON
     * @param catalog
     *           countries' catalog (two-letter country code, which is case-sensitive)
-    * @param albumId
-    *           the ID of the album to load
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/albums/{albumId}")
-   void getAlbum( //
+   Call<AlbumData> getAlbum( //
+      @Path("albumId") String albumId, //
       @Query("apikey") String apikey, //
       @Query("pretty") boolean pretty, //
-      @Query("catalog") String catalog, //
-      @Path("albumId") String albumId, //
-      Callback<AlbumData> callBack);
+      @Query("catalog") String catalog);
 
    /**
     * Returns a list of new releases, curated by Rhapsody. This list can be personalized for the user by passing the
@@ -55,33 +53,12 @@ public interface AlbumService {
     *           countries' catalog (two-letter country code, which is case-sensitive)
     * @param userId
     *           the user ID to get personalized new releases, if <code>null</code>no personalization is made
-    * @param callBack
-    *           callback to which the result is passed
+    * @return asynchronous result
     */
    @GET("/v1/albums/new")
-   void getNewReleases( //
+   public Call<Collection<AlbumData>> getNewReleases( //
       @Query("apikey") String apikey, //
       @Query("pretty") boolean pretty, //
       @Query("catalog") String catalog, //
-      @Query("guid") String userId, //
-      Callback<Collection<AlbumData>> callBack);
-
-   /**
-    * Synchronously returns detailed information about a given album, including its tracks.
-    * 
-    * @param apikey
-    *           the API key
-    * @param pretty
-    *           if <code>true</code> pretty prints the JSON
-    * @param catalog
-    *           countries' catalog (two-letter country code, which is case-sensitive)
-    * @param albumId
-    *           the ID of the album to load
-    */
-   @GET("/v1/albums/{albumId}")
-   AlbumData getAlbum( //
-      @Query("apikey") String apikey, //
-      @Query("pretty") boolean pretty, //
-      @Query("catalog") String catalog, //
-      @Path("albumId") String albumId);
+      @Query("guid") String userId);
 }

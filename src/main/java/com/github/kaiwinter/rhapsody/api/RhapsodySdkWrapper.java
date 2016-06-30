@@ -305,10 +305,11 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAlbum(String albumId, Callback<AlbumData> callback) {
+   public void loadAlbum(String albumId, RhapsodyCallback<AlbumData> callback) {
       LOGGER.info("Loading album {}", albumId);
       Call<AlbumData> call = albumService.getAlbum(albumId, apiKey, prettyJson, authorizationInfo.catalog);
-      call.enqueue(callback);
+      Callback<AlbumData> sdkCallback = mapCallback(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -345,10 +346,12 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadArtistMeta(String artistId, Callback<ArtistData> callback) {
+   public void loadArtistMeta(String artistId, RhapsodyCallback<ArtistData> callback) {
       LOGGER.info("Loading artist's {} info", artistId);
+
+      Callback<ArtistData> sdkCallback = mapCallback(callback);
       Call<ArtistData> call = artistService.getArtist(artistId, apiKey, prettyJson, authorizationInfo.catalog);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -385,10 +388,11 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadArtistBio(String artistId, Callback<BioData> callback) {
+   public void loadArtistBio(String artistId, RhapsodyCallback<BioData> callback) {
       LOGGER.info("Loading artist's {} bio", artistId);
+      Callback<BioData> sdkCallback = mapCallback(callback);
       Call<BioData> call = artistService.getBio(artistId, apiKey, prettyJson, authorizationInfo.catalog);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -401,10 +405,33 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadGenres(Callback<Collection<GenreData>> callback) {
+   public void loadGenres(RhapsodyCallback<Collection<GenreData>> callback) {
       LOGGER.info("Loading genres");
+
+      Callback<Collection<GenreData>> sdkCallback = mapCallback(callback);
       Call<Collection<GenreData>> call = genreService.getGenresAsync(apiKey, prettyJson, authorizationInfo.catalog);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
+   }
+
+   private <T> Callback<T> mapCallback(RhapsodyCallback<T> rhapsodyCallback) {
+      Callback<T> sdkCallback = new Callback<T>() {
+
+         @Override
+         public void onResponse(Call<T> call, Response<T> response) {
+            if (response.isSuccessful()) {
+               rhapsodyCallback.onSuccess(response.body());
+            } else {
+               rhapsodyCallback.onFailure(new Throwable(response.message()), response.code());
+            }
+         }
+
+         @Override
+         public void onFailure(Call<T> call, Throwable throwable) {
+            rhapsodyCallback.onFailure(throwable, -1);
+         }
+      };
+
+      return sdkCallback;
    }
 
    /**
@@ -421,18 +448,21 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAlbumNewReleases(String userId, Callback<Collection<AlbumData>> callback) {
+   public void loadAlbumNewReleases(String userId, RhapsodyCallback<Collection<AlbumData>> callback) {
+
+      Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
+
       String cacheId = "rhapsody" + userId;
       Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
       if (data == null) {
          LOGGER.info("Loading curated album releases from server");
-         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, callback);
+         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, sdkCallback);
          Call<Collection<AlbumData>> call = albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog,
             userId);
          call.enqueue(callbackExt);
       } else {
          LOGGER.info("Using curated album releases from cache");
-         callback.onResponse(null, Response.success(data));
+         sdkCallback.onResponse(null, Response.success(data));
       }
    }
 
@@ -450,17 +480,19 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadGenreNewReleases(String genreId, Integer limit, Callback<Collection<AlbumData>> callback) {
+   public void loadGenreNewReleases(String genreId, Integer limit, RhapsodyCallback<Collection<AlbumData>> callback) {
+      Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
+
       Collection<AlbumData> data = dataCache.getNewReleases(genreId);
       if (data == null) {
          LOGGER.info("Loading genre new releases from server");
-         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
+         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, sdkCallback);
          Call<Collection<AlbumData>> call = genreService.getNewReleasesAsync(genreId, apiKey, prettyJson,
             authorizationInfo.catalog, limit);
          call.enqueue(callbackExt);
       } else {
          LOGGER.info("Using genre new releases from cache");
-         callback.onResponse(null, Response.success(data));
+         sdkCallback.onResponse(null, Response.success(data));
       }
    }
 
@@ -490,11 +522,14 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAccount(Callback<AccountData> callback) {
+   public void loadAccount(RhapsodyCallback<AccountData> callback) {
       LOGGER.info("Loading account information");
+
       String authorization = getAuthorizationString();
+      Callback<AccountData> sdkCallback = mapCallback(callback);
+
       Call<AccountData> call = memberService.getAccountAsync(authorization, prettyJson);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -531,11 +566,13 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAllArtistsInLibrary(Integer limit, Callback<Collection<Artist>> callback) {
+   public void loadAllArtistsInLibrary(Integer limit, RhapsodyCallback<Collection<Artist>> callback) {
       LOGGER.info("Loading all artists in library");
+
+      Callback<Collection<Artist>> sdkCallback = mapCallback(callback);
       Call<Collection<Artist>> call = libraryService.loadAllArtistsInLibrary(getAuthorizationString(), prettyJson,
          limit);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -553,11 +590,13 @@ public class RhapsodySdkWrapper {
     *           callback which is called on success or failure
     */
    public void loadAllAlbumsByArtistInLibrary(String artistId, Integer limit,
-      Callback<Collection<AlbumData>> callback) {
+      RhapsodyCallback<Collection<AlbumData>> callback) {
       LOGGER.info("Loading all albums by artists in library");
+
+      Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
       Call<Collection<AlbumData>> call = libraryService.loadAllAlbumsByArtistInLibrary(getAuthorizationString(),
          artistId, prettyJson, limit);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -572,11 +611,13 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAllAlbumsInLibrary(Integer limit, Callback<Collection<AlbumData>> callback) {
+   public void loadAllAlbumsInLibrary(Integer limit, RhapsodyCallback<Collection<AlbumData>> callback) {
       LOGGER.info("Loading all albums in library");
+
+      Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
       Call<Collection<AlbumData>> call = libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson,
          limit);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -614,11 +655,12 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadTopPlayedArtists(Integer limit, RangeEnum range, Callback<List<ChartsArtist>> callback) {
+   public void loadTopPlayedArtists(Integer limit, RangeEnum range, RhapsodyCallback<List<ChartsArtist>> callback) {
       LOGGER.info("Loading artist charts");
+      Callback<List<ChartsArtist>> sdkCallback = mapCallback(callback);
       Call<List<ChartsArtist>> call = chartService.loadTopPlayedArtistsAsync(getAuthorizationString(), prettyJson,
          limit, RangeEnum.life);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -635,11 +677,13 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadTopPlayedAlbums(Integer limit, RangeEnum range, Callback<List<ChartsAlbum>> callback) {
+   public void loadTopPlayedAlbums(Integer limit, RangeEnum range, RhapsodyCallback<List<ChartsAlbum>> callback) {
       LOGGER.info("Loading album charts");
+
+      Callback<List<ChartsAlbum>> sdkCallback = mapCallback(callback);
       Call<List<ChartsAlbum>> call = chartService.loadTopPlayedAlbumsAsync(getAuthorizationString(), prettyJson, limit,
          RangeEnum.life);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -650,10 +694,12 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           doesn't return any data except the HTTP Response
     */
-   public void addAlbumToLibrary(String albumId, Callback<Void> callback) {
+   public void addAlbumToLibrary(String albumId, RhapsodyCallback<Void> callback) {
       LOGGER.info("Adding album with ID '{}' to library", albumId);
+
+      Callback<Void> sdkCallback = mapCallback(callback);
       Call<Void> call = libraryService.addAlbumToLibrary(getAuthorizationString(), authorizationInfo.catalog, albumId);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 
    /**
@@ -668,9 +714,11 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           doesn't return any data except the HTTP Response
     */
-   public void removeAlbumFromLibrary(String albumId, Callback<Void> callback) {
+   public void removeAlbumFromLibrary(String albumId, RhapsodyCallback<Void> callback) {
       LOGGER.info("Removing album with ID '{}' from library", albumId);
+
+      Callback<Void> sdkCallback = mapCallback(callback);
       Call<Void> call = libraryService.removeAlbumFromLibrary(getAuthorizationString(), albumId);
-      call.enqueue(callback);
+      call.enqueue(sdkCallback);
    }
 }

@@ -421,13 +421,13 @@ public class RhapsodySdkWrapper {
             if (response.isSuccessful()) {
                rhapsodyCallback.onSuccess(response.body());
             } else {
-               rhapsodyCallback.onFailure(new Throwable(response.message()), response.code());
+               rhapsodyCallback.onFailure(response.code(), response.message());
             }
          }
 
          @Override
          public void onFailure(Call<T> call, Throwable throwable) {
-            rhapsodyCallback.onFailure(throwable, -1);
+            rhapsodyCallback.onFailure(-1, throwable.getMessage());
          }
       };
 

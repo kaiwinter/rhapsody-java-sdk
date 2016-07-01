@@ -18,11 +18,10 @@ public interface RhapsodyCallback<T> {
 
    /**
     * Called on failure. This may be a HTTP error or a connection error.
-    * 
-    * @param throwable
-    *           the causing throwable in case of a connection error, the status message is wrapped in a Throwable
     * @param code
     *           the HTTP code, or -1 if not an HTTP error
+    * @param message
+    *           the causing throwable in case of a connection error, the status message is wrapped in a Throwable
     */
-   void onFailure(Throwable throwable, int code);
+   void onFailure(int code, String message);
 }

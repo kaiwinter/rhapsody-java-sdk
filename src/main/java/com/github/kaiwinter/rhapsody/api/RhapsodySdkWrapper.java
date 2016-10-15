@@ -270,9 +270,10 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAlbum(String albumId, Callback<AlbumData> callback) {
+   public void loadAlbum(String albumId, RhapsodyCallback<AlbumData> callback) {
       LOGGER.info("Loading album {}", albumId);
-      albumService.getAlbum(apiKey, prettyJson, authorizationInfo.catalog, albumId, callback);
+      Callback<AlbumData> sdkCallback = mapCallback(callback);
+      albumService.getAlbum(apiKey, prettyJson, authorizationInfo.catalog, albumId, sdkCallback);
    }
 
    /**
@@ -284,6 +285,7 @@ public class RhapsodySdkWrapper {
     *
     * @param albumId
     *           the ID of the album to load
+    * @return the album's meta information
     */
    public AlbumData getAlbum(String albumId) {
       LOGGER.info("Loading album {}", albumId);
@@ -303,18 +305,19 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadArtistMeta(String artistId, Callback<ArtistData> callback) {
+   public void loadArtistMeta(String artistId, RhapsodyCallback<ArtistData> callback) {
       LOGGER.info("Loading artist's {} info", artistId);
-      artistService.getArtist(apiKey, prettyJson, authorizationInfo.catalog, artistId, callback);
+      Callback<ArtistData> sdkCallback = mapCallback(callback);
+      artistService.getArtist(apiKey, prettyJson, authorizationInfo.catalog, artistId, sdkCallback);
    }
 
    /**
     * Synchronously loads the artist's metadata ({@link ArtistData}) with the given <code>artistId</code> synchronously.
-    * 
+    *
     * <p>
     * REST-method: <code>/artists/{artistId}</code>
     * </p>
-    * 
+    *
     * @param artistId
     *           the ID of the artist to load
     * @return the artist's meta information
@@ -336,9 +339,10 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadArtistBio(String artistId, Callback<BioData> callback) {
+   public void loadArtistBio(String artistId, RhapsodyCallback<BioData> callback) {
       LOGGER.info("Loading artist's {} bio", artistId);
-      artistService.getBio(apiKey, prettyJson, authorizationInfo.catalog, artistId, callback);
+      Callback<BioData> sdkCallback = mapCallback(callback);
+      artistService.getBio(apiKey, prettyJson, authorizationInfo.catalog, artistId, sdkCallback);
    }
 
    /**
@@ -351,9 +355,10 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadGenres(Callback<Collection<GenreData>> callback) {
+   public void loadGenres(RhapsodyCallback<Collection<GenreData>> callback) {
       LOGGER.info("Loading genres");
-      genreService.getGenres(apiKey, prettyJson, authorizationInfo.catalog, callback);
+      Callback<Collection<GenreData>> sdkCallback = mapCallback(callback);
+      genreService.getGenres(apiKey, prettyJson, authorizationInfo.catalog, sdkCallback);
    }
 
    /**
@@ -370,16 +375,17 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAlbumNewReleases(String userId, Callback<Collection<AlbumData>> callback) {
+   public void loadAlbumNewReleases(String userId, RhapsodyCallback<Collection<AlbumData>> callback) {
       String cacheId = "rhapsody" + userId;
       Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
       if (data == null) {
          LOGGER.info("Loading curated album releases from server");
-         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, callback);
+         Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
+         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, sdkCallback);
          albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, userId, callbackExt);
       } else {
          LOGGER.info("Using curated album releases from cache");
-         callback.success(data, null);
+         callback.onSuccess(data);
       }
    }
 
@@ -397,15 +403,16 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadGenreNewReleases(String genreId, Integer limit, Callback<Collection<AlbumData>> callback) {
+   public void loadGenreNewReleases(String genreId, Integer limit, RhapsodyCallback<Collection<AlbumData>> callback) {
       Collection<AlbumData> data = dataCache.getNewReleases(genreId);
       if (data == null) {
          LOGGER.info("Loading genre new releases from server");
-         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, callback);
+         Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
+         Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(genreId, sdkCallback);
          genreService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, genreId, limit, callbackExt);
       } else {
          LOGGER.info("Using genre new releases from cache");
-         callback.success(data, null);
+         callback.onSuccess(data);
       }
    }
 
@@ -435,10 +442,11 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAccount(Callback<AccountData> callback) {
+   public void loadAccount(RhapsodyCallback<AccountData> callback) {
       LOGGER.info("Loading account information");
       String authorization = getAuthorizationString();
-      memberService.getAccount(authorization, prettyJson, callback);
+      Callback<AccountData> sdkCallback = mapCallback(callback);
+      memberService.getAccount(authorization, prettyJson, sdkCallback);
    }
 
    /**
@@ -470,9 +478,10 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAllArtistsInLibrary(Integer limit, Callback<Collection<Artist>> callback) {
+   public void loadAllArtistsInLibrary(Integer limit, RhapsodyCallback<Collection<Artist>> callback) {
       LOGGER.info("Loading all artists in library");
-      libraryService.loadAllArtistsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
+      Callback<Collection<Artist>> sdkCallback = mapCallback(callback);
+      libraryService.loadAllArtistsInLibrary(getAuthorizationString(), prettyJson, limit, sdkCallback);
    }
 
    /**
@@ -490,9 +499,10 @@ public class RhapsodySdkWrapper {
     *           callback which is called on success or failure
     */
    public void loadAllAlbumsByArtistInLibrary(String artistId, Integer limit,
-      Callback<Collection<AlbumData>> callback) {
+      RhapsodyCallback<Collection<AlbumData>> callback) {
       LOGGER.info("Loading all albums by artists in library");
-      libraryService.loadAllAlbumsByArtistInLibrary(getAuthorizationString(), prettyJson, artistId, limit, callback);
+      Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
+      libraryService.loadAllAlbumsByArtistInLibrary(getAuthorizationString(), prettyJson, artistId, limit, sdkCallback);
    }
 
    /**
@@ -507,18 +517,19 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAllAlbumsInLibrary(Integer limit, Callback<Collection<AlbumData>> callback) {
+   public void loadAllAlbumsInLibrary(Integer limit, RhapsodyCallback<Collection<AlbumData>> callback) {
       LOGGER.info("Loading all albums in library");
-      libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson, limit, callback);
+      Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
+      libraryService.loadAllAlbumsInLibrary(getAuthorizationString(), prettyJson, limit, sdkCallback);
    }
 
    /**
     * Loads the top played tracks.
-    * 
+    *
     * <p>
     * REST-method: <code>/me/charts/tracks</code>
     * </p>
-    * 
+    *
     * @param limit
     *           the number of tracks to load, if <code>null</code> the default value is used (20)
     * @param range
@@ -526,18 +537,19 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadTopPlayedTracks(Integer limit, RangeEnum range, Callback<List<ChartsTrack>> callback) {
+   public void loadTopPlayedTracks(Integer limit, RangeEnum range, RhapsodyCallback<List<ChartsTrack>> callback) {
       LOGGER.info("Loading artist charts");
-      chartService.loadTopPlayedTracks(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+      Callback<List<ChartsTrack>> sdkCallback = mapCallback(callback);
+      chartService.loadTopPlayedTracks(getAuthorizationString(), prettyJson, limit, RangeEnum.life, sdkCallback);
    }
 
    /**
     * Loads the top played artists.
-    * 
+    *
     * <p>
     * REST-method: <code>/me/charts/artists</code>
     * </p>
-    * 
+    *
     * @param limit
     *           the number of artists to load, if <code>null</code> the default value is used (20)
     * @param range
@@ -545,18 +557,19 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadTopPlayedArtists(Integer limit, RangeEnum range, Callback<List<ChartsArtist>> callback) {
+   public void loadTopPlayedArtists(Integer limit, RangeEnum range, RhapsodyCallback<List<ChartsArtist>> callback) {
       LOGGER.info("Loading artist charts");
-      chartService.loadTopPlayedArtists(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+      Callback<List<ChartsArtist>> sdkCallback = mapCallback(callback);
+      chartService.loadTopPlayedArtists(getAuthorizationString(), prettyJson, limit, RangeEnum.life, sdkCallback);
    }
 
    /**
     * Loads the top played albums.
-    * 
+    *
     * <p>
     * REST-method: <code>/me/charts/albums</code>
     * </p>
-    * 
+    *
     * @param limit
     *           the number of albums to load, if <code>null</code> the default value is used (20)
     * @param range
@@ -564,38 +577,65 @@ public class RhapsodySdkWrapper {
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadTopPlayedAlbums(Integer limit, RangeEnum range, Callback<List<ChartsAlbum>> callback) {
+   public void loadTopPlayedAlbums(Integer limit, RangeEnum range, RhapsodyCallback<List<ChartsAlbum>> callback) {
       LOGGER.info("Loading album charts");
-      chartService.loadTopPlayedAlbums(getAuthorizationString(), prettyJson, limit, RangeEnum.life, callback);
+      Callback<List<ChartsAlbum>> sdkCallback = mapCallback(callback);
+      chartService.loadTopPlayedAlbums(getAuthorizationString(), prettyJson, limit, RangeEnum.life, sdkCallback);
    }
 
    /**
     * Adds an album to the user's library.
-    * 
+    *
     * @param albumId
     *           the ID of the album to add
     * @param callback
     *           doesn't return any data except the HTTP Response
     */
-   public void addAlbumToLibrary(String albumId, Callback<Void> callback) {
+   public void addAlbumToLibrary(String albumId, RhapsodyCallback<Void> callback) {
       LOGGER.info("Adding album with ID '{}' to library", albumId);
-      libraryService.addAlbumToLibrary(getAuthorizationString(), authorizationInfo.catalog, albumId, callback);
+      Callback<Void> sdkCallback = mapCallback(callback);
+      libraryService.addAlbumToLibrary(getAuthorizationString(), authorizationInfo.catalog, albumId, sdkCallback);
    }
 
    /**
     * Deletes an album from the user's library.
-    * 
+    *
     * <p>
     * REST-method: <code>/v1/me/library/albums/{albumId}</code>
     * </p>
-    * 
+    *
     * @param albumId
     *           the ID of the album to remove
     * @param callback
     *           doesn't return any data except the HTTP Response
     */
-   public void removeAlbumFromLibrary(String albumId, Callback<Void> callback) {
+   public void removeAlbumFromLibrary(String albumId, RhapsodyCallback<Void> callback) {
       LOGGER.info("Removing album with ID '{}' from library", albumId);
-      libraryService.removeAlbumFromLibrary(getAuthorizationString(), albumId, callback);
+      Callback<Void> sdkCallback = mapCallback(callback);
+      libraryService.removeAlbumFromLibrary(getAuthorizationString(), albumId, sdkCallback);
+   }
+
+   /**
+    * Maps a {@link RhapsodyCallback} to a {@link Callback}.
+    *
+    * @param rhapsodyCallback
+    *           the {@link RhapsodyCallback}
+    * @return the {@link Callback}
+    */
+   private <T> Callback<T> mapCallback(RhapsodyCallback<T> rhapsodyCallback) {
+      Callback<T> sdkCallback = new Callback<T>() {
+
+         @Override
+         public void success(T data, Response response) {
+            rhapsodyCallback.onSuccess(data);
+         }
+
+         @Override
+         public void failure(RetrofitError error) {
+            rhapsodyCallback.onFailure(-1, error.getMessage());
+         }
+      };
+
+      return sdkCallback;
    }
 }

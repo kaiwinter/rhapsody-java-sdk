@@ -1,5 +1,5 @@
 # rhapsody-java-sdk
-Pure Java wrapper for the [Rhapsody/Napster REST API](https://developer.rhapsody.com/api). It handles:
+Pure Java wrapper for the [Rhapsody/Napster REST API](https://developer.napster.com/api/v1). It handles:
 * user authentication
 * storage of the access and refresh token
 * re-authentication by using the refresh token

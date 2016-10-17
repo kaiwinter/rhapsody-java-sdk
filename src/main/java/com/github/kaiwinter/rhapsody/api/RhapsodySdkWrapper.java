@@ -204,7 +204,17 @@ public class RhapsodySdkWrapper {
          public void failure(RetrofitError error) {
             int status = error.getResponse().getStatus();
             String reason = error.getResponse().getReason();
-            LOGGER.error("Error authorizing ()", status, error);
+
+            try {
+               // Try to provide a better error message
+               // eg. "Invalid app credentials": check your API key
+               ErrorResponse errorResponse = (ErrorResponse) error.getBodyAs(ErrorResponse.class);
+               reason = reason + ": " + errorResponse.message;
+            } catch (RuntimeException e) {
+               // No success
+            }
+
+            LOGGER.error("Error authorizing ({} {})", status, reason);
 
             if (loginCallback != null) {
                loginCallback.failure(status, reason);
@@ -642,5 +652,13 @@ public class RhapsodySdkWrapper {
       };
 
       return sdkCallback;
+   }
+
+   /**
+    * Response on failed login.
+    */
+   private static class ErrorResponse {
+      String code;
+      String message;
    }
 }

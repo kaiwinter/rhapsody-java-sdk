@@ -37,6 +37,7 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RestAdapter.LogLevel;
 import retrofit.RetrofitError;
+import retrofit.RetrofitError.Kind;
 import retrofit.client.Response;
 
 /**
@@ -632,7 +633,11 @@ public class RhapsodySdkWrapper {
 
          @Override
          public void failure(RetrofitError error) {
-            rhapsodyCallback.onFailure(-1, error.getMessage());
+            int httpCode = -1;
+            if (error.getKind() == Kind.HTTP) {
+               httpCode = error.getResponse().getStatus();
+            }
+            rhapsodyCallback.onFailure(httpCode, error.getMessage());
          }
       };
 

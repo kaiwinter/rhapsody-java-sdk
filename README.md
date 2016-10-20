@@ -70,7 +70,7 @@ Thanks to retrofit adding more REST methods to the wrapper can be done with very
 	Loaded 21 genres
 
 ## Maven
-rhapsody-java-sdk is not on Maven Central. Find it on [JitPack.io](https://jitpack.io/#kaiwinter/rhapsody-java-sdk/v1.1.0)
+rhapsody-java-sdk is not on Maven Central. Find it on [JitPack.io](https://jitpack.io/#kaiwinter/rhapsody-java-sdk/1.3.0)
 ```xml
 <repository>
 	 <id>jitpack.io</id>

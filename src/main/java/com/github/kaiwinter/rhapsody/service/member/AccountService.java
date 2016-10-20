@@ -10,7 +10,7 @@ import retrofit.http.Query;
 /**
  * Wrapper of the Member REST API.
  * 
- * @see https://developer.rhapsody.com/api#member-apis
+ * @see <a href="https://developer.rhapsody.com/api#member-apis">https://developer.rhapsody.com/api#member-apis</a>
  */
 public interface AccountService {
 

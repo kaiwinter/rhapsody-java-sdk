@@ -14,7 +14,7 @@ import retrofit.http.Query;
 /**
  * Wrapper of the Charts REST API.
  *
- * @see https://developer.rhapsody.com/api#charts
+ * @see <a href="https://developer.rhapsody.com/api#charts">https://developer.rhapsody.com/api#charts</a>
  */
 public interface ChartService {
 

@@ -13,7 +13,7 @@ import retrofit.http.Query;
 /**
  * Wrapper of the Genre REST API.
  * 
- * @see https://developer.rhapsody.com/api#genres
+ * @see <a href="https://developer.rhapsody.com/api#genres">https://developer.rhapsody.com/api#genres</a>
  */
 public interface GenreService {
 

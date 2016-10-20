@@ -14,7 +14,7 @@ import retrofit.http.Query;
 /**
  * Wrapper of the Artist REST API.
  *
- * @see https://developer.rhapsody.com/api#artists
+ * @see <a href="https://developer.rhapsody.com/api#artists">https://developer.rhapsody.com/api#artists</a>
  */
 public interface ArtistService {
 
@@ -39,6 +39,26 @@ public interface ArtistService {
       @Query("catalog") String catalog, //
       @Path("artistId") String artistId, //
       Callback<ArtistData> callBack);
+
+   /**
+    * Synchronously returns a given artist's name, ID and primary genre.
+    * 
+    * @param apikey
+    *           the API key
+    * @param pretty
+    *           if <code>true</code> pretty prints the JSON
+    * @param catalog
+    *           countries' catalog (two-letter country code, which is case-sensitive)
+    * @param artistId
+    *           the ID of the artist to load
+    * @return the {@link ArtistData}
+    */
+   @GET("/v1/artists/{artistId}")
+   ArtistData getArtist( //
+      @Query("apikey") String apikey, //
+      @Query("pretty") boolean pretty, //
+      @Query("catalog") String catalog, //
+      @Path("artistId") String artistId);
 
    /**
     * Returns biographical info for a given artist, including up to five short "blurbs" written by our editorial staff.
@@ -84,23 +104,4 @@ public interface ArtistService {
       @Query("catalog") String catalog, //
       @Path("artistId") String artistId, //
       @Query("limit") Integer limit);
-
-   /**
-    * Synchronously returns a given artist's name, ID and primary genre.
-    * 
-    * @param apikey
-    *           the API key
-    * @param pretty
-    *           if <code>true</code> pretty prints the JSON
-    * @param catalog
-    *           countries' catalog (two-letter country code, which is case-sensitive)
-    * @param artistId
-    *           the ID of the artist to load
-    */
-   @GET("/v1/artists/{artistId}")
-   ArtistData getArtist( //
-      @Query("apikey") String apikey, //
-      @Query("pretty") boolean pretty, //
-      @Query("catalog") String catalog, //
-      @Path("artistId") String artistId);
 }

@@ -13,7 +13,7 @@ import retrofit.http.Query;
 /**
  * Wrapper of the Album REST API.
  * 
- * @see https://developer.rhapsody.com/api#albums
+ * @see <a href="https://developer.rhapsody.com/api#albums">https://developer.rhapsody.com/api#albums</a>
  */
 public interface AlbumService {
 
@@ -77,6 +77,7 @@ public interface AlbumService {
     *           countries' catalog (two-letter country code, which is case-sensitive)
     * @param albumId
     *           the ID of the album to load
+    * @return the {@link AlbumData}
     */
    @GET("/v1/albums/{albumId}")
    AlbumData getAlbum( //

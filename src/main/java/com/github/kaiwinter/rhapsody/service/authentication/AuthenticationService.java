@@ -17,7 +17,8 @@ import retrofit.http.POST;
  * simply call the access_token service, passing your client secret.
  * </p>
  * 
- * @see https://developer.rhapsody.com/api#authentication
+ * @see <a href=
+ *      "https://developer.rhapsody.com/api#authentication">https://developer.rhapsody.com/api#authentication</a>
  */
 public interface AuthenticationService {
 

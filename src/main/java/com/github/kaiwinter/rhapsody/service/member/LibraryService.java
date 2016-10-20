@@ -18,7 +18,7 @@ import retrofit.http.Query;
 /**
  * Wrapper of the Album REST API.
  *
- * @see https://developer.rhapsody.com/api#albums
+ * @see <a href="https://developer.rhapsody.com/api#albums">https://developer.rhapsody.com/api#albums</a>
  */
 public interface LibraryService {
 

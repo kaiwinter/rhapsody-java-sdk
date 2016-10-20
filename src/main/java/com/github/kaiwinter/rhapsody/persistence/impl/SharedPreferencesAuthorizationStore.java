@@ -24,6 +24,12 @@ public final class SharedPreferencesAuthorizationStore implements AuthorizationS
    private static final String PROPERTY_CATALOG = "catalog";
    private Context context;
 
+   /**
+    * Constructs a new {@link AuthorizationStore} which stores the user login in the Android {@link SharedPreferences}.
+    * 
+    * @param context
+    *           the {@link Context}
+    */
    public SharedPreferencesAuthorizationStore(Context context) {
       this.context = context;
    }

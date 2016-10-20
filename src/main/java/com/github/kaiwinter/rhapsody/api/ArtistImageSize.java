@@ -23,6 +23,11 @@ public enum ArtistImageSize {
       this.size = size;
    }
 
+   /**
+    * Returns the image size.
+    * 
+    * @return the image size
+    */
    public String getSize() {
       return size;
    }

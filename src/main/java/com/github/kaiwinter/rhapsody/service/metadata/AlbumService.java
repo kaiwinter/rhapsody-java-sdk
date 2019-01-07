@@ -55,6 +55,8 @@ public interface AlbumService {
     *           countries' catalog (two-letter country code, which is case-sensitive)
     * @param userId
     *           the user ID to get personalized new releases, if <code>null</code>no personalization is made
+    * @param limit
+    *           the number of releases which are loaded, if <code>null</code> the servers default value is used
     * @param callBack
     *           callback to which the result is passed
     */
@@ -64,6 +66,7 @@ public interface AlbumService {
       @Query("pretty") boolean pretty, //
       @Query("catalog") String catalog, //
       @Query("guid") String userId, //
+      @Query("limit") Integer limit, //
       Callback<Collection<AlbumData>> callBack);
 
    /**

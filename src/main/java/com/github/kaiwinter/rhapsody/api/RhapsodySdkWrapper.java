@@ -383,17 +383,19 @@ public class RhapsodySdkWrapper {
     *
     * @param userId
     *           the <code>guid</code> of the user, may be <code>null</code>
+    * @param limit
+    *           the number of releases to load, if <code>null</code> the default value is used (20)
     * @param callback
     *           callback which is called on success or failure
     */
-   public void loadAlbumNewReleases(String userId, RhapsodyCallback<Collection<AlbumData>> callback) {
+   public void loadAlbumNewReleases(String userId, Integer limit, RhapsodyCallback<Collection<AlbumData>> callback) {
       String cacheId = "rhapsody" + userId;
       Collection<AlbumData> data = dataCache.getNewReleases(cacheId);
       if (data == null) {
          LOGGER.info("Loading curated album releases from server");
          Callback<Collection<AlbumData>> sdkCallback = mapCallback(callback);
          Callback<Collection<AlbumData>> callbackExt = dataCache.getAddNewReleasesToCacheCallback(cacheId, sdkCallback);
-         albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, userId, callbackExt);
+         albumService.getNewReleases(apiKey, prettyJson, authorizationInfo.catalog, userId, limit, callbackExt);
       } else {
          LOGGER.info("Using curated album releases from cache");
          callback.onSuccess(data);

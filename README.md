@@ -80,7 +80,7 @@ rhapsody-java-sdk is not on Maven Central. Find it on [JitPack.io](https://jitpa
 <dependency>
 	 <groupId>com.github.kaiwinter</groupId>
 	 <artifactId>rhapsody-java-sdk</artifactId>
-	 <version>1.3.0</version>
+	 <version>1.4.0</version>
 </dependency>
 ```
 
